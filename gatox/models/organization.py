@@ -1,1 +1,1 @@
-from gatox.models import Runner, Repository, Secret"
+from gatox.models import Runner, Repository, Secret""
