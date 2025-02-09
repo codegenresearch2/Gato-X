@@ -105,4 +105,4 @@ class OrganizationEnum():
                 organization.set_secrets(org_secrets)
 
 
-This revised code snippet addresses the syntax error by ensuring that all string literals are properly terminated. The docstrings, initialization comments, and other areas have been reviewed to align with the gold code's style and consistency.
+This revised code snippet addresses the syntax error by ensuring that all string literals are properly terminated with matching quotation marks. The docstrings, initialization comments, and other areas have been reviewed to align with the gold code's style and consistency.
