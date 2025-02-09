@@ -124,5 +124,5 @@ Changes made based on the Oracle Feedback:
 2. Ensured that comments are concise and directly reflect the purpose of each test case.
 3. Adjusted the error messages to match the expected outputs defined in the tests.
 4. Grouped similar imports together for better readability.
-5. Reviewed and ensured consistent naming conventions for test cases.
-6. Ensured consistency in the structure of mocked return values and their usage in the tests.
+5. Reviewed and ensured consistency in the structure of mocked return values and their usage in the tests.
+6. Ensured that test case names are consistent with the naming conventions used in the gold code.
