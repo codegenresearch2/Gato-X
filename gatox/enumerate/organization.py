@@ -1,8 +1,6 @@
 from typing import List
 from gatox.models.organization import Organization
 from gatox.models.repository import Repository
-from gatox.models.secret import Secret
-from gatox.models.runner import Runner
 from gatox.github.api import Api
 
 
@@ -51,25 +49,3 @@ class OrganizationEnum:
             organization.sso_enabled = self.api.validate_sso(organization.name, org_private_repos[0].name)
 
         return org_public_repos + org_private_repos
-
-    def admin_enum(self, organization: Organization):
-        """Enumeration tasks to perform if the user is an org admin and the token has the necessary scopes."""
-        if organization.org_admin_scopes and organization.org_admin_user:
-            runners = self.api.check_org_runners(organization.name)
-            if runners:
-                org_runners = [
-                    Runner(
-                        runner['name'],
-                        machine_name=None,
-                        os=runner['os'],
-                        status=runner['status'],
-                        labels=runner['labels']
-                    )
-                    for runner in runners['runners']
-                ]
-                organization.set_runners(org_runners)
-
-            org_secrets = self.api.get_org_secrets(organization.name)
-            if org_secrets:
-                org_secrets = [Secret(secret, organization.name) for secret in org_secrets]
-                organization.set_secrets(org_secrets)
