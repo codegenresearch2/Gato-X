@@ -60,6 +60,7 @@ class DataIngestor:
                 },
                 'archived': result['isArchived'],
                 'isFork': result['isFork'],
+                'allow_forking': result['allowForking'],
                 'environments': []
             }
 
