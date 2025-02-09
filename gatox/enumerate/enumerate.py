@@ -137,7 +137,7 @@ class Enumerator:
                 f'The user { self.user_perms["user"] } belongs to 0 organizations!'
             )
 
-        return True, orgs
+        return orgs
 
     def self_enumeration(self):
         """Enumerates all organizations associated with the authenticated user.
