@@ -19,6 +19,7 @@ class Organization():
         self.org_member = False
         self.secrets: list[Secret] = []
         self.runners: list[Runner] = []
+        self.sso_enabled = False
         self.public_repos = []
         self.private_repos = []
 
@@ -75,16 +76,16 @@ class Organization():
         """
         self.runners = runners
 
-    def set_repository(self, repository: Repository):
+    def set_repository(self, repo: Repository):
         """Add a single repository to the organization.
 
         Args:
-            repository (Repository): The repository to be added.
+            repo (Repository): The repository to be added.
         """
-        if repository.is_public():
-            self.public_repos.append(repository)
+        if repo.is_private():
+            self.private_repos.append(repo)
         else:
-            self.private_repos.append(repository)
+            self.public_repos.append(repo)
 
     def toJSON(self):
         """Converts the repository to a Gato JSON representation.
@@ -100,6 +101,7 @@ class Organization():
                 "org_member": self.org_member,
                 "org_runners": [runner.toJSON() for runner in self.runners],
                 "org_secrets": [secret.toJSON() for secret in self.secrets],
+                "sso_access": self.sso_enabled,
                 "public_repos":
                     [repository.toJSON() for repository in self.public_repos],
                 "private_repos":
