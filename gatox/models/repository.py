@@ -18,15 +18,15 @@ class Repository():
 
         self.name = self.repo_data['full_name']
         self.org_name = self.name.split('/')[0]
-        self.secrets: list[Secret] = []
-        self.org_secrets: list[Secret] = []
+        self.secrets = []
+        self.org_secrets = []
         self.sh_workflow_names = []
         self.enum_time = datetime.datetime.now()
 
         self.permission_data = self.repo_data['permissions']
         self.sh_runner_access = False
-        self.accessible_runners: list[Runner] = []
-        self.runners: list[Runner] = []
+        self.accessible_runners = []
+        self.runners = []
         self.pwn_req_risk = []
         self.injection_risk = []
 
@@ -123,8 +123,7 @@ class Repository():
 
     def add_accessible_runner(self, runner: Runner):
         """Add a runner is accessible by this repo.
-        This runner could be org level or repo level.
-
+        This runner could be org level or repo level."
         Args:
             runner (Runner): Runner wrapper object"""
         self.sh_runner_access = True
