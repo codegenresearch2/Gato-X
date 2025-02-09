@@ -75,10 +75,10 @@ class Organization:
 
     def set_repository(self, repo: Repository):
         """Add a single repository to the organization."
-        if repo.is_public:
-            self.public_repos.append(repo)
-        else:
+        if repo.is_private():
             self.private_repos.append(repo)
+        else:
+            self.public_repos.append(repo)
 
     def toJSON(self):
         """Converts the repository to a Gato JSON representation.
