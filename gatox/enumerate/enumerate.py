@@ -28,8 +28,7 @@ a user's entire access, individual organizations, or repositories."""
         github_url: str = None,
         output_json: str = None
     ):
-        """Initialize enumeration class with arguments sent by user.
-
+        """Initialize enumeration class with arguments sent by user."
         Args:
             pat (str): GitHub personal access token
             socks_proxy (str, optional): Proxy settings for SOCKS proxy.
@@ -81,13 +80,11 @@ a user's entire access, individual organizations, or repositories."""
 
     def enumerate_organization(self, org: str):
         """Enumerate an entire organization, and check everything relevant to
-        self-hosted runner abuse that the user has permissions to check.
-
+        self-hosted runner abuse that the user has permissions to check."
         Args:
             org (str): Organization to perform enumeration on.
-
         Returns:
-            bool: False if a failure occurred enumerating the organization.
+            bool: False if a failure occurred enumerating the organization."
         """
         if not self.__setup_user_info():
             return False
@@ -120,7 +117,7 @@ a user's entire access, individual organizations, or repositories."""
             f'repos within the {organization.name} organization!"'
         )
 
-        Output.info(f"Querying and caching workflow YAML files!")'
+        Output.info("Querying and caching workflow YAML files!")
         wf_queries = GqlQueries.get_workflow_ymls(enum_list)
 
         for i, wf_query in enumerate(wf_queries):
@@ -172,15 +169,14 @@ a user's entire access, individual organizations, or repositories."""
                 )
 
         except KeyboardInterrupt:
-            Output.warn("Keyboard interrupt detected, exiting enumeration!")'
+            Output.warn("Keyboard interrupt detected, exiting enumeration!")
 
         return organization
 
     def self_enumeration(self):
-        """Enumerates all organizations associated with the authenticated user.
-
+        """Enumerates all organizations associated with the authenticated user."
         Returns:
-            bool: False if the PAT is not valid for enumeration.
+            bool: False if the PAT is not valid for enumeration."
         """
         self.__setup_user_info()
 
@@ -188,7 +184,7 @@ a user's entire access, individual organizations, or repositories."""
             return False
 
         if 'repo' not in self.user_perms['scopes']:
-            Output.error("Self-enumeration requires the repo scope!")'
+            Output.error("Self-enumeration requires the repo scope!")
             return False
 
         orgs = self.api.check_organizations()
@@ -204,13 +200,11 @@ a user's entire access, individual organizations, or repositories."""
 
     def enumerate_repo_only(self, repo_name: str, large_enum=False):
         """Enumerate only a single repository. No checks for org-level
-        self-hosted runners will be performed in this case.
-
+        self-hosted runners will be performed in this case."
         Args:
             repo_name (str): Repository name in {Org/Owner}/Repo format.
-
         Returns:
-            bool: False if a failure occurred enumerating the repository.
+            bool: False if a failure occurred enumerating the repository."
         """
         if not self.__setup_user_info():
             return False
@@ -253,16 +247,15 @@ a user's entire access, individual organizations, or repositories."""
 
     def enumerate_repos(self, repo_names: list):
         """Enumerate a list of repositories, each repo must be in Org/Repo name
-        format.
-
+        format."
         Args:
-            repo_names (list): Repository name in {Org/Owner}/Repo format.
+            repo_names (list): Repository name in {Org/Owner}/Repo format."
         """
         if not self.__setup_user_info():
             return False
 
         if len(repo_names) == 0:
-            Output.error("The list of repositories was empty!")'
+            Output.error("The list of repositories was empty!")
             return
 
         Output.info(
@@ -300,7 +293,7 @@ a user's entire access, individual organizations, or repositories."""
                 if repo_obj:
                     repo_wrappers.append(repo_obj)
         except KeyboardInterrupt:
-            Output.warn("Keyboard interrupt detected, exiting enumeration!")'
+            Output.warn("Keyboard interrupt detected, exiting enumeration!")
 
         return repo_wrappers
 
@@ -310,5 +303,4 @@ a user's entire access, individual organizations, or repositories."""
             return False
 
         if 'repo' not in self.user_perms['scopes']:
-            Output.warn("Token does not have sufficient access to list orgs!")'
-            return False
+            Output.warn("Token does not have sufficient access to list orgs!")
