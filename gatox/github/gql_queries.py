@@ -124,7 +124,7 @@ class GqlQueries:
         """
         Constructs a list of GraphQL queries to fetch workflow YAML files from a list of repositories.
 
-        This method splits the list of repositories into chunks of up to 50 repositories each, and constructs a separate GraphQL query for each chunk.
+        This method splits the list of repositories into chunks of up to 100 repositories each, and constructs a separate GraphQL query for each chunk.
 
         Args:
             repos (list): A list of repository slugs, where each slug is a string in the format "owner/name".
@@ -135,8 +135,8 @@ class GqlQueries:
         """
         queries = []
 
-        for i in range(0, len(repos), 50):
-            chunk = repos[i:i + 50]
+        for i in range(0, len(repos), 100):
+            chunk = repos[i:i + 100]
             repo_queries = []
 
             for j, repo in enumerate(chunk):
