@@ -34,7 +34,7 @@ class Execution:
         if repositories:
             self.repositories = repositories
 
-    def set_user_details(self, user_details: dict):
+    def set_user_details(self, user_details):
         """Set user details.
 
         Args:
