@@ -13,7 +13,6 @@ class Organization():
             user_scopes (list): List of OAuth scopes that the PAT has
             limited_data (bool): Whether limited org_data is present (default: False)
         """
-        self.name = None
         self.org_admin_user = False
         self.org_admin_scopes = False
         self.org_member = False
@@ -23,7 +22,6 @@ class Organization():
         self.public_repos: list[Repository] = []
         self.private_repos: list[Repository] = []
         self.limited_data = limited_data
-
         self.name = org_data['login']
 
         # If fields such as billing email are populated, then the user MUST
