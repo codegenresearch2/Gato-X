@@ -64,11 +64,7 @@ class WorkflowParser():
             bool: Whether the workflow has the specified trigger.
         """
         triggers = self.parsed_yml.get('on', {})
-        if isinstance(triggers, list):
-            return trigger in triggers
-        elif isinstance(triggers, dict):
-            return any(trigger == t for t in triggers)
-        return False
+        return trigger in triggers if isinstance(triggers, list) else trigger in triggers.values()
 
     def output(self, dirpath: str):
         """Write this yaml file out to the provided directory.
