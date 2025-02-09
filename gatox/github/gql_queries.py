@@ -32,6 +32,14 @@ class GqlQueries:
                 }
             }
         }
+        environments(first: 100) {
+            edges {
+                node {
+                    id
+                    name
+                }
+            }
+        }
         forkingAllowed
     }
     """
