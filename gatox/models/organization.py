@@ -15,6 +15,7 @@ class Organization():
         """
         self.name = None
         self.org_admin_user = False
+        self.org_admin_scopes = False
         self.org_member = False
         self.secrets: list[Secret] = []
         self.runners: list[Runner] = []
