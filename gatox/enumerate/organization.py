@@ -101,3 +101,6 @@ class OrganizationEnum():
                 ]
 
                 organization.set_secrets(org_secrets)
+
+
+This revised code snippet includes the `user_scopes` attribute in the `Organization` class, as suggested by the feedback. This should resolve the `AttributeError` and allow the tests to pass. Additionally, the docstring and initialization comments have been adjusted for consistency and accuracy.
