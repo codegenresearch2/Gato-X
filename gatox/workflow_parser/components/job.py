@@ -69,11 +69,11 @@ class Job():
                 else:
                     self.if_condition = f"RESTRICTED: {self.if_condition}"
             except ValueError as ve:
-                self.if_condition = f"ERROR: {str(ve)}"
+                self.if_condition = original_if_condition
             except NotImplementedError as ni:
-                self.if_condition = f"ERROR: {str(ni)}"
+                self.if_condition = original_if_condition
             except (SyntaxError, IndexError) as e:
-                self.if_condition = f"ERROR: {str(e)}"
+                self.if_condition = original_if_condition
             finally:
                 self.evaluated = True
         return self.if_condition
