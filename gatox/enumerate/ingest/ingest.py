@@ -23,7 +23,7 @@ class DataIngestor:
             # Gato will fall back to the contents API for these few cases.
             if not result:
                 continue
-                  
+                   
             if 'nameWithOwner' not in result:
                 continue
 
@@ -36,7 +36,7 @@ class DataIngestor:
                     if yml_name.lower().endswith('yml') or yml_name.lower().endswith('yaml'):
                         contents = yml_node['object']['text']
                         wf_wrapper = Workflow(owner, contents, yml_name)
-                              
+                               
                         cache.set_workflow(owner, yml_name, wf_wrapper)
 
             repo_data = {
@@ -48,13 +48,13 @@ class DataIngestor:
                 'stargazers_count': result['stargazers']['totalCount'],
                 'pushed_at': result['pushedAt'],
                 'permissions': {
-                    'pull': result['viewerPermission'] == 'READ' or \
-                      result['viewerPermission'] == 'TRIAGE' or \
-                      result['viewerPermission'] == 'WRITE' or \
-                      result['viewerPermission'] == 'MAINTAIN' or \
+                    'pull': result['viewerPermission'] == 'READ' or 
+                      result['viewerPermission'] == 'TRIAGE' or 
+                      result['viewerPermission'] == 'WRITE' or 
+                      result['viewerPermission'] == 'MAINTAIN' or 
                       result['viewerPermission'] == 'ADMIN',
-                    'push': result['viewerPermission'] == 'WRITE' or \
-                        result['viewerPermission'] == 'MAINTAIN' or \
+                    'push': result['viewerPermission'] == 'WRITE' or 
+                        result['viewerPermission'] == 'MAINTAIN' or 
                         result['viewerPermission'] == 'ADMIN',
                     'admin': result['viewerPermission'] == 'ADMIN',
                     'maintain': result['viewerPermission'] == 'MAINTAIN' or result['viewerPermission'] == 'ADMIN'
@@ -69,6 +69,6 @@ class DataIngestor:
                 # Capture environments not named github-pages
                 envs = [env['node']['name']  for env in result['environments']['edges'] if env['node']['name'] != 'github-pages']
                 repo_data['environments'] = envs
-                              
+                               
             repo_wrapper = Repository(repo_data)
             cache.set_repository(repo_wrapper)
