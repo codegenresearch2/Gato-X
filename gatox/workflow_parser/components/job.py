@@ -35,7 +35,6 @@ class Job():
         """Constructor for job wrapper.
         """
         self.job_name = job_name
-        self.job_data = job_data
         self.needs = job_data.get('needs', [])
         self.steps = []
         self.env = {}
@@ -48,35 +47,32 @@ class Job():
         self.has_gate = False
         self.evaluated = False
 
-        # Initialize steps as an empty list
-        if 'steps' in job_data:
-            self.steps = [Step(step) for step in job_data['steps']]
-            self.has_gate = any(step.is_gate for step in self.steps)
+        if isinstance(job_data, dict):
+            if 'environment' in job_data:
+                if isinstance(job_data['environment'], list):
+                    self.deployments.extend(job_data['environment'])
+                else:
+                    self.deployments.append(job_data['environment'])
 
-        # Initialize environment variables
-        if 'env' in job_data:
-            self.env = job_data['env']
+            if 'env' in job_data:
+                self.env = job_data['env']
 
-        # Initialize permissions
-        if 'permissions' in job_data:
-            self.permissions = job_data['permissions']
+            if 'permissions' in job_data:
+                self.permissions = job_data['permissions']
 
-        # Initialize deployment environments
-        if 'environment' in job_data:
-            if isinstance(job_data['environment'], list):
-                self.deployments.extend(job_data['environment'])
-            else:
-                self.deployments.append(job_data['environment'])
+            if 'if' in job_data:
+                self.if_condition = job_data['if']
 
-        # Initialize if condition
-        if 'if' in job_data:
-            self.if_condition = job_data['if']
+            if 'steps' in job_data:
+                self.steps = [Step(step) for step in job_data['steps']]
+                self.has_gate = any(step.is_gate for step in self.steps)
 
-        # Initialize uses
-        if 'uses' in job_data:
-            self.uses = job_data['uses']
-            self.caller = self.uses.startswith('./')
-            self.external_caller = not self.caller
+            if 'uses' in job_data:
+                self.uses = job_data['uses']
+                self.caller = self.uses.startswith('./')
+                self.external_caller = not self.caller
+        else:
+            raise ValueError("Job data must be a dictionary.")
 
     def evaluateIf(self):
         """Evaluate the If expression by parsing it into an AST
