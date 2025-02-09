@@ -72,7 +72,7 @@ class Repository():
         Returns:
             bool: True if the repository is private, False otherwise.
         """
-        return self.repo_data['private']
+        return not self.repo_data['visibility'] == 'public'
     
     def is_archived(self) -> bool:
         """Check if the repository is archived.
