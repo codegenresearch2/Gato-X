@@ -31,6 +31,7 @@ class GqlQueries:
                 }
             }
         }
+        forkingAllowed
     }
     """
 
@@ -66,6 +67,7 @@ class GqlQueries:
                         }
                     }
                 }
+                forkingAllowed
             }
         }
     }
@@ -111,6 +113,7 @@ class GqlQueries:
                         }
                     }
                 }
+                forkingAllowed
             }
         }
     }
@@ -123,7 +126,7 @@ class GqlQueries:
         files from a list of repositories.
 
         This method splits the list of repositories into chunks of 
-        up to 100 repositories each, and constructs a separate
+        up to 50 repositories each, and constructs a separate
         GraphQL query for each chunk. Each query fetches the workflow 
         YAML files from the repositories in one chunk.
 
