@@ -34,7 +34,10 @@ class WorkflowParser():
             raise ValueError("Received invalid workflow!")
 
         self.parsed_yml = workflow_wrapper.parsed_yml or {}
-        self.jobs = [Job(job_data, job_name) for job_name, job_data in self.parsed_yml.get('jobs', {}).items()]
+        self.jobs = []
+        if 'jobs' in self.parsed_yml:
+            self.jobs = [Job(job_data, job_name) for job_name, job_data in self.parsed_yml['jobs'].items()]
+
         self.raw_yaml = workflow_wrapper.workflow_contents
         self.repo_name = workflow_wrapper.repo_name
         self.wf_name = workflow_wrapper.workflow_name
