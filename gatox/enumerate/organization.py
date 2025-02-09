@@ -2,6 +2,8 @@ from typing import List
 from gatox.models.organization import Organization
 from gatox.models.repository import Repository
 from gatox.github.api import Api
+from gatox.models.secret import Secret
+from gatox.models.runner import Runner
 
 
 class OrganizationEnum:
