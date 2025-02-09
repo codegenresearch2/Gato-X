@@ -15,10 +15,9 @@ limitations under the License.
 """
 
 import logging
-
-from pathlib import Path
 import os
 import re
+from pathlib import Path
 
 from gatox.configuration.configuration_manager import ConfigurationManager
 from gatox.workflow_parser.utility import filter_tokens, decompose_action_ref
@@ -31,7 +30,7 @@ logger = logging.getLogger(__name__)
 class WorkflowParser():
     """Parser for YML files.
 
-    This class is structurd to take a yaml file as input, it will then
+    This class is structured to take a yaml file as input, it will then
     expose methods that aim to answer questions about the yaml file.
 
     This will allow for growing what kind of analytics this tool can perform
@@ -48,10 +47,7 @@ class WorkflowParser():
         """Initialize class with workflow file.
 
         Args:
-            workflow_yml (str): String containing yaml file read in from
-            repository.
-            repo_name (str): Name of the repository.
-            workflow_name (str): name of the workflow file
+            workflow_wrapper (Workflow): Workflow object containing parsed YAML and other metadata.
         """
         if workflow_wrapper.isInvalid():
             raise ValueError("Received invalid workflow!")
@@ -78,7 +74,6 @@ class WorkflowParser():
             self.branch = None
 
         self.composites = self.extract_referenced_actions()
-
 
     def is_referenced(self):
         return self.external_ref
@@ -142,8 +137,7 @@ class WorkflowParser():
         """
         vulnerable_triggers = []
         risky_triggers = ['pull_request_target', 'workflow_run', 
-                          'issue_comment', 'issues', 'discussion_comment', 'discussion'
-                          'fork', 'watch']
+                          'issue_comment', 'issues']
         if alternate:
             risky_triggers = [alternate]
 
@@ -190,7 +184,7 @@ class WorkflowParser():
         'actions/checkout' action with a 'ref' parameter.
 
         Returns:
-            job_checkouts: List of 'ref' values within the 'actions/checkout' steps.
+           job_checkouts: List of 'ref' values within the 'actions/checkout' steps.
         """
         job_checkouts = {}
         if 'jobs' not in self.parsed_yml:
@@ -205,11 +199,6 @@ class WorkflowParser():
             }
             step_details = []
             bump_confidence = False
-
-            if job.isCaller():
-                self.callees.append(job.uses.split('/')[-1])
-            elif job.external_caller:
-                self.callees.append(job.uses)
 
             if job_content['if_check'] and job_content['if_check'].startswith("RESTRICTED"):
                 job_content['gated'] = True
