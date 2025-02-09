@@ -116,11 +116,11 @@ a user's entire access, individual organizations, or repositories."""
 
         Output.info(
             f"About to enumerate "
-            f"{len(organization.private_repos) + len(organization.public_repos)} "
-            f"repos within the {organization.name} organization!"
+            f'{len(organization.private_repos) + len(organization.public_repos)} ' 
+            f'repos within the {organization.name} organization!"'
         )
 
-        Output.info(f"Querying and caching workflow YAML files!")
+        Output.info(f"Querying and caching workflow YAML files!")'
         wf_queries = GqlQueries.get_workflow_ymls(enum_list)
 
         for i, wf_query in enumerate(wf_queries):
@@ -134,7 +134,7 @@ a user's entire access, individual organizations, or repositories."""
                     else:
                         Output.warn(
                             f"GraphQL query failed with {result.status_code} "
-                            f"on attempt {str(i+1)}, will try again!"
+                            f'on attempt {str(i+1)}, will try again!"
                         )
                         time.sleep(10)
                         Output.warn(f"Query size was: {len(wf_query)}")
@@ -172,7 +172,7 @@ a user's entire access, individual organizations, or repositories."""
                 )
 
         except KeyboardInterrupt:
-            Output.warn("Keyboard interrupt detected, exiting enumeration!")
+            Output.warn("Keyboard interrupt detected, exiting enumeration!")'
 
         return organization
 
@@ -188,7 +188,7 @@ a user's entire access, individual organizations, or repositories."""
             return False
 
         if 'repo' not in self.user_perms['scopes']:
-            Output.error("Self-enumeration requires the repo scope!")
+            Output.error("Self-enumeration requires the repo scope!")'
             return False
 
         orgs = self.api.check_organizations()
@@ -262,12 +262,12 @@ a user's entire access, individual organizations, or repositories."""
             return False
 
         if len(repo_names) == 0:
-            Output.error("The list of repositories was empty!")
+            Output.error("The list of repositories was empty!")'
             return
 
         Output.info(
             f"Querying and caching workflow YAML files "
-            f"from {len(repo_names)} repositories!"
+            f'from {len(repo_names)} repositories!"'
         )
         queries = GqlQueries.get_workflow_ymls_from_list(repo_names)
 
@@ -282,7 +282,7 @@ a user's entire access, individual organizations, or repositories."""
                     else:
                         Output.warn(
                             f"GraphQL query failed with {result.status_code} "
-                            f"on attempt {str(i+1)}, will try again!"
+                            f'on attempt {str(i+1)}, will try again!"
                         )
                         time.sleep(10)
                         Output.warn(f"Query size was: {len(wf_query)}")
@@ -300,7 +300,7 @@ a user's entire access, individual organizations, or repositories."""
                 if repo_obj:
                     repo_wrappers.append(repo_obj)
         except KeyboardInterrupt:
-            Output.warn("Keyboard interrupt detected, exiting enumeration!")
+            Output.warn("Keyboard interrupt detected, exiting enumeration!")'
 
         return repo_wrappers
 
@@ -310,6 +310,5 @@ a user's entire access, individual organizations, or repositories."""
             return False
 
         if 'repo' not in self.user_perms['scopes']:
-            Output.warn("Token does not have sufficient access to list orgs!")
+            Output.warn("Token does not have sufficient access to list orgs!")'
             return False
-    
