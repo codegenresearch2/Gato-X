@@ -1,19 +1,3 @@
-"""
-Copyright 2024, Adnan Khan
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
-
 import logging
 import re
 import os
@@ -50,6 +34,8 @@ class WorkflowParser():
             raise ValueError("Received invalid workflow!")
 
         self.parsed_yml = workflow_wrapper.parsed_yml
+        if self.parsed_yml is None:
+            self.parsed_yml = {}
         self.jobs = [Job(job_data, job_name) for job_name, job_data in self.parsed_yml.get('jobs', {}).items()]
         self.raw_yaml = workflow_wrapper.workflow_contents
         self.repo_name = workflow_wrapper.repo_name
@@ -240,6 +226,7 @@ class WorkflowParser():
         injection_risk = {}
 
         for job in self.jobs:
+            tokens = []
             for step in job.steps:
                 if step.is_gate:
                     break
