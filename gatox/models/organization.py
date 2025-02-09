@@ -45,7 +45,7 @@ class Organization():
             self.org_member = False
 
     def set_secrets(self, secrets: list[Secret]):
-        """Set org-level secrets.
+        """Set organization-level secrets.
 
         Args:
             secrets (list): List of secrets at the organization level.
@@ -53,7 +53,7 @@ class Organization():
         self.secrets = secrets
 
     def set_public_repos(self, repos: list[Repository]):
-        """List of public repos for the org.
+        """Set list of public repositories for the organization.
 
         Args:
             repos (List[Repository]): List of Repository wrapper objects.
@@ -61,7 +61,7 @@ class Organization():
         self.public_repos = repos
 
     def set_private_repos(self, repos: list[Repository]):
-        """List of private repos for the org.
+        """Set list of private repositories for the organization.
 
         Args:
             repos (List[Repository]): List of Repository wrapper objects.
@@ -78,10 +78,10 @@ class Organization():
         self.runners = runners
 
     def set_repository(self, repo: Repository):
-        """Set a repository for the organization.
+        """Add a single repository to the organization.
 
         Args:
-            repo (Repository): The repository to set.
+            repo (Repository): The repository to add.
         """
         if repo.is_private():
             self.private_repos.append(repo)
@@ -89,23 +89,19 @@ class Organization():
             self.public_repos.append(repo)
 
     def toJSON(self):
-        """Converts the organization to a Gato JSON representation.
-        """
-        if self.limited_data:
-            representation = {
-                "name": self.name
-            }
-        else:
-            representation = {
-                "name": self.name,
-                "org_admin_user": self.org_admin_user,
-                "org_admin_scopes": self.org_admin_scopes,
-                "org_member": self.org_member,
-                "org_runners": [runner.toJSON() for runner in self.runners],
-                "org_secrets": [secret.toJSON() for secret in self.secrets],
-                "sso_access": self.sso_enabled,
-                "public_repos": [repository.toJSON() for repository in self.public_repos],
-                "private_repos": [repository.toJSON() for repository in self.private_repos]
-            }
+        """Convert the organization to a Gato JSON representation.
 
-        return representation
+        Returns:
+            dict: JSON representation of the organization.
+        """
+        return {
+            "name": self.name,
+            "org_admin_user": self.org_admin_user,
+            "org_admin_scopes": self.org_admin_scopes,
+            "org_member": self.org_member,
+            "org_runners": [runner.toJSON() for runner in self.runners],
+            "org_secrets": [secret.toJSON() for secret in self.secrets],
+            "sso_access": self.sso_enabled,
+            "public_repos": [repository.toJSON() for repository in self.public_repos],
+            "private_repos": [repository.toJSON() for repository in self.private_repos]
+        }
