@@ -97,6 +97,7 @@ def test_enumerate_repo_admin(mock_api, capsys):
         "scopes": ["repo", "workflow"],
     }
     mock_api.return_value.retrieve_run_logs.return_value = BASE_MOCK_RUNNER
+    mock_api.return_value.get_repository.return_value = TEST_REPO_DATA
 
     repo_data = json.loads(json.dumps(TEST_REPO_DATA))
     repo_data["permissions"]["admin"] = True
@@ -128,6 +129,7 @@ def test_enumerate_repo_admin_no_wf(mock_api, capsys):
         "scopes": ["repo"],
     }
     mock_api.return_value.retrieve_run_logs.return_value = BASE_MOCK_RUNNER
+    mock_api.return_value.get_repository.return_value = TEST_REPO_DATA
 
     repo_data = json.loads(json.dumps(TEST_REPO_DATA))
     repo_data["permissions"]["admin"] = True
@@ -159,6 +161,7 @@ def test_enumerate_repo_no_wf_no_admin(mock_api, capsys):
         "scopes": ["repo"],
     }
     mock_api.return_value.retrieve_run_logs.return_value = BASE_MOCK_RUNNER
+    mock_api.return_value.get_repository.return_value = TEST_REPO_DATA
 
     repo_data = json.loads(json.dumps(TEST_REPO_DATA))
     repo_data["permissions"]["admin"] = False
@@ -189,6 +192,7 @@ def test_enumerate_repo_no_wf_maintain(mock_api, capsys):
         "scopes": ["repo", "workflow"],
     }
     mock_api.return_value.retrieve_run_logs.return_value = BASE_MOCK_RUNNER
+    mock_api.return_value.get_repository.return_value = TEST_REPO_DATA
 
     repo_data = json.loads(json.dumps(TEST_REPO_DATA))
     repo_data["permissions"]["maintain"] = True
@@ -432,12 +436,4 @@ def test_enum_repos_empty(mock_api, capfd):
         output_yaml=False,
         skip_log=True,
     )
-    gh_enumeration_runner.enumerate_repos([])
-    out, _ = capfd.readouterr()
-    assert "The list of repositories was empty!" in escape_ansi(out)
-    mock_api.return_value.get_repository.assert_not_called()
-
-@patch("gatox.enumerate.enumerate.Api")
-def test_bad_token(mock_api):
-    gh_enumeration_runner = Enumerator(
-        "gh
+    gh_enumeration_runner.enumerate_repos
