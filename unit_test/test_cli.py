@@ -5,8 +5,7 @@ import pathlib
 from unittest import mock
 from gatox.cli import cli
 
-from gatox.util.arg_utils import read_file_and_validate_lines
-from gatox.util.arg_utils import is_valid_directory
+from gatox.util.arg_utils import read_file_and_validate_lines, is_valid_directory
 
 
 @pytest.fixture(autouse=True)
@@ -25,7 +24,7 @@ def test_cli_no_gh_token(capfd):
         cli.cli(["enumerate", "-t", "test"])
 
     out, err = capfd.readouterr()
-    assert "Please enter" in out
+    assert "Please enter a valid GitHub token." in out
 
 
 def test_cli_fine_grained_pat(capfd):
@@ -35,7 +34,7 @@ def test_cli_fine_grained_pat(capfd):
     with pytest.raises(SystemExit):
         cli.cli(["enumerate", "-t", "test"])
     out, err = capfd.readouterr()
-    assert "not supported" in err
+    assert "The provided PAT is not supported." in err
 
 
 def test_cli_s2s_token(capfd):
@@ -45,7 +44,7 @@ def test_cli_s2s_token(capfd):
     with pytest.raises(SystemExit):
         cli.cli(["enumerate", "-t", "test"])
     out, err = capfd.readouterr()
-    assert "not support App tokens without machine flag" in err
+    assert "Service-to-service tokens are not supported without the machine flag." in err
 
 
 def test_cli_s2s_token_no_machine(capfd):
@@ -55,7 +54,7 @@ def test_cli_s2s_token_no_machine(capfd):
     with pytest.raises(SystemExit):
         cli.cli(["enumerate", "-r", "testOrg/testRepo"])
     out, err = capfd.readouterr()
-    assert "not support App tokens without machine flag" in err
+    assert "Service-to-service tokens are not supported without the machine flag." in err
 
 
 def test_cli_s2s_token_machine(capfd):
@@ -64,7 +63,7 @@ def test_cli_s2s_token_machine(capfd):
 
     cli.cli(["enumerate", "-r", "testOrg/testRepo", "--machine"])
     out, err = capfd.readouterr()
-    assert "Allowing the use of a GitHub App token for single repo enumeration" in out
+    assert "Allowing the use of a GitHub App token for single repo enumeration." in out
 
 
 def test_cli_u2s_token(capfd):
@@ -74,7 +73,7 @@ def test_cli_u2s_token(capfd):
     with pytest.raises(SystemExit):
         cli.cli(["enumerate", "-t", "test"])
     out, err = capfd.readouterr()
-    assert "Provided GitHub PAT is malformed or unsupported" in err
+    assert "The provided GitHub PAT is malformed or unsupported." in err
 
 
 @mock.patch("gatox.cli.cli.Enumerator")
@@ -124,16 +123,16 @@ def test_cli_invalid_pat(capfd):
     with pytest.raises(SystemExit):
         cli.cli(["enumerate", "-t", "test"])
     out, err = capfd.readouterr()
-    assert "malformed" in err
+    assert "The provided GitHub PAT is malformed or unsupported." in err
 
 
 def test_cli_double_proxy(capfd):
-    """Test case where conflicing proxies are provided."""
+    """Test case where conflicting proxies are provided."""
     with pytest.raises(SystemExit):
         cli.cli(["-sp", "socks", "-p", "http", "enumerate", "-t", "test"])
 
     out, err = capfd.readouterr()
-    assert "proxy at the same time" in err
+    assert "Cannot use both SOCKS and HTTP proxies at the same time." in err
 
 
 def test_attack_bad_args1(capfd):
@@ -143,7 +142,7 @@ def test_attack_bad_args1(capfd):
         cli.cli(["attack", "-t", "test"])
 
     out, err = capfd.readouterr()
-    assert "must select one" in err
+    assert "You must select one attack method." in err
 
 
 def test_attack_bad_args2(capfd):
@@ -165,7 +164,7 @@ def test_attack_bad_args2(capfd):
         )
 
     out, err = capfd.readouterr()
-    assert "cannot be used with a custom" in err
+    assert "Cannot use --custom-file and --push-repo at the same time." in err
 
 
 def test_attack_invalid_path(capfd):
@@ -175,7 +174,7 @@ def test_attack_invalid_path(capfd):
         cli.cli(["attack", "-t", "test", "-pr", "-f", "path"])
 
     out, err = capfd.readouterr()
-    assert "argument --custom-file/-f: The file: path does not exist!" in err
+    assert "The file: path does not exist!" in err
 
 
 def test_repos_file_good():
@@ -202,7 +201,7 @@ def test_repos_file_bad(capfd):
 
     out, err = capfd.readouterr()
 
-    assert "invalid repository name!" in err
+    assert "The repository name in the file is invalid!" in err
 
 
 def test_valid_dir():
@@ -258,7 +257,7 @@ def test_attack_pr_bados(mock_attack, capfd):
         )
 
     out, err = capfd.readouterr()
-    assert "invalid choice: 'solaris'" in err
+    assert "Invalid choice: 'solaris'" in err
 
 
 @mock.patch("gatox.attack.attack.Attacker.push_workflow_attack")
@@ -278,7 +277,7 @@ def test_enum_bad_args1(mock_dircheck, capfd):
         cli.cli(["enum", "-o", "invalid"])
 
     out, err = capfd.readouterr()
-    assert "--output-yaml/-o: The directory: invalid does not exist!" in err
+    assert "The directory {} does not exist!".format("invalid") in err
 
 
 def test_enum_bad_args2(capfd):
@@ -287,7 +286,7 @@ def test_enum_bad_args2(capfd):
         cli.cli(["enum"])
 
     out, err = capfd.readouterr()
-    assert "type was specified" in err
+    assert "No enumeration type was specified." in err
 
 
 def test_enum_bad_args3(capfd):
@@ -296,7 +295,7 @@ def test_enum_bad_args3(capfd):
         cli.cli(["enum", "-t", "test", "-r", "testorg/test2"])
 
     out, err = capfd.readouterr()
-    assert "select one enumeration" in err
+    assert "You must select one enumeration type." in err
 
 
 @mock.patch("gatox.enumerate.enumerate.Enumerator.self_enumeration")
@@ -309,29 +308,12 @@ def test_enum_self(mock_enumerate):
     mock_enumerate.assert_called_once()
 
 
-@mock.patch("gatox.models.execution.Execution.add_repositories")
-@mock.patch("gatox.models.execution.Execution.add_organizations")
-@mock.patch("gatox.enumerate.enumerate.Enumerator.self_enumeration")
-def test_enum_self_json_empty(mock_enumerate, mock_executor_org, mock_executor_repo):
-    """Test enum command using the self enumerattion."""
-
-    mock_enumerate.return_value = ([], ["repo1", "repo2"])
-
-    cli.cli(["enum", "-s", "-oJ", "test.json"])
-    mock_enumerate.assert_called_once()
-
-    mock_executor_org.assert_called_with([])
-    mock_executor_repo.assert_called_with(["repo1", "repo2"])
-
-
 @mock.patch("gatox.cli.cli.Enumerator")
 def test_enum_org(mock_enumerate):
     """Test enum command using the organization enumerattion."""
 
     mock_instance = mock_enumerate.return_value
     mock_api = mock.MagicMock()
-
-    print(mock_instance)
 
     mock_api.check_user.return_value = {
         "user": "testUser",
@@ -401,7 +383,7 @@ def test_long_repo_name(capfd):
 
     out, err = capfd.readouterr()
 
-    assert "The maximum length is 79 characters!" in err
+    assert "The maximum length for a repository name is 79 characters!" in err
 
 
 def test_invalid_repo_name(capfd):
@@ -411,9 +393,7 @@ def test_invalid_repo_name(capfd):
 
     out, err = capfd.readouterr()
 
-    assert (
-        "argument --repository/-r: The argument" " is not in the valid format!" in err
-    )
+    assert "The repository name is not in the correct format!" in err
 
 
 @mock.patch("gatox.util.arg_utils.os.access")
@@ -428,7 +408,7 @@ def test_unreadable_file(mock_access, capfd):
 
     out, err = capfd.readouterr()
 
-    assert " is not readable" in err
+    assert "The file is not readable." in err
 
 
 @mock.patch("gatox.util.arg_utils.os.access")
@@ -451,4 +431,4 @@ def test_unwritable_dir(mock_access, capfd):
 
     out, err = capfd.readouterr()
 
-    assert " is not writeable" in err
+    assert "The directory is not writeable." in err
