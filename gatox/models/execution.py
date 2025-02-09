@@ -22,20 +22,18 @@ class Execution:
         Args:
             organizations (List[Organization]): List of org wrappers.
         """
-        if organizations:
-            self.organizations = organizations
+        self.organizations = organizations
 
     def add_repositories(self, repositories: list[Repository]):
         """Add list of organization wrapper objects.
 
         Args:
-            organizations (List[Organization]): List of org wrappers.
+            repositories (List[Repository]): List of repo wrappers.
         """
-        if repositories:
-            self.repositories = repositories
+        self.repositories = repositories
 
     def set_user_details(self, user_details):
-        """_summary_
+        """Set user details.
 
         Args:
             user_details (dict): Details about the user's permissions.
@@ -44,13 +42,12 @@ class Execution:
 
     def toJSON(self):
         """Converts the run to Gato JSON representation"""
-
         if self.user_details:
             representation = {
                 "username": self.user_details["user"],
                 "scopes": self.user_details["scopes"],
                 "enumeration": {
-                    "timestamp": self.timestamp.ctime(),
+                    "timestamp": self.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
                     "organizations": [
                         organization.toJSON() for organization in self.organizations
                     ],
