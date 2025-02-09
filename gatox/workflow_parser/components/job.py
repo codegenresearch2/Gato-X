@@ -22,6 +22,13 @@ from gatox.workflow_parser.expression_evaluator import ExpressionEvaluator
 class Job():
     """Wrapper class for a Github Actions workflow job.
     """
+    LARGER_RUNNER_REGEX_LIST = re.compile(
+        r'(windows|ubuntu)-(22.04|20.04|2019-2022)-(4|8|16|32|64)core-(16|32|64|128|256)gb'
+    )
+    MATRIX_KEY_EXTRACTION_REGEX = re.compile(
+        r'{{\s*matrix\.([\w-]+)\s*}}'
+    )
+
     EVALUATOR = ExpressionEvaluator()
 
     def __init__(self, job_data: dict, job_name: str):
@@ -53,8 +60,8 @@ class Job():
                     self.if_condition = f"EVALUATED: {self.if_condition}"
                 else:
                     self.if_condition = f"RESTRICTED: {self.if_condition}"
-            except (ValueError, NotImplementedError, SyntaxError, IndexError):
-                pass
+            except (ValueError, NotImplementedError, SyntaxError, IndexError) as e:
+                self.if_condition = self.if_condition
             finally:
                 self.evaluated = True
         return self.if_condition
@@ -75,3 +82,10 @@ class Job():
         references a reusable workflow that runs on workflow_call)
         """
         return self.caller
+
+    def isSelfHosted(self):
+        """Check if the job is configured to use self-hosted runners.
+        """
+        if 'runs-on' in self.job_data:
+            return self.job_data['runs-on'].startswith('self-hosted')
+        return False
