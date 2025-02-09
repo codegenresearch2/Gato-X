@@ -33,9 +33,7 @@ class WorkflowParser():
         if workflow_wrapper.isInvalid():
             raise ValueError("Received invalid workflow!")
 
-        self.parsed_yml = workflow_wrapper.parsed_yml
-        if self.parsed_yml is None:
-            self.parsed_yml = {}
+        self.parsed_yml = workflow_wrapper.parsed_yml or {}
         self.jobs = [Job(job_data, job_name) for job_name, job_data in self.parsed_yml.get('jobs', {}).items()]
         self.raw_yaml = workflow_wrapper.workflow_contents
         self.repo_name = workflow_wrapper.repo_name
@@ -276,30 +274,7 @@ class WorkflowParser():
         sh_jobs = []
 
         for job in self.jobs:
-            if 'runs-on' in job.job_data:
-                runs_on = job.job_data['runs-on']
-                if 'self-hosted' in runs_on:
-                    sh_jobs.append((job.job_name, job.job_data))
-                elif 'matrix.' in runs_on:
-                    matrix_match = re.search(r'{{\s*matrix\.([\w-]+)\s*}}', runs_on)
-                    if matrix_match:
-                        matrix_key = matrix_match.group(1)
-                        if 'strategy' in job.job_data and 'matrix' in job.job_data['strategy']:
-                            matrix = job.job_data['strategy']['matrix']
-                            if matrix_key in matrix:
-                                os_list = matrix[matrix_key]
-                                for key in os_list:
-                                    if key not in ConfigurationManager().WORKFLOW_PARSING['GITHUB_HOSTED_LABELS'] and not self.LARGER_RUNNER_REGEX_LIST.match(key):
-                                        sh_jobs.append((job.job_name, job.job_data))
-                                        break
-                else:
-                    if isinstance(runs_on, list):
-                        for label in runs_on:
-                            if label not in ConfigurationManager().WORKFLOW_PARSING['GITHUB_HOSTED_LABELS'] and not self.LARGER_RUNNER_REGEX_LIST.match(label):
-                                sh_jobs.append((job.job_name, job.job_data))
-                                break
-                    elif isinstance(runs_on, str):
-                        if runs_on not in ConfigurationManager().WORKFLOW_PARSING['GITHUB_HOSTED_LABELS'] and not self.LARGER_RUNNER_REGEX_LIST.match(runs_on):
-                            sh_jobs.append((job.job_name, job.job_data))
+            if 'runs-on' in job.job_data and 'self-hosted' in job.job_data['runs-on']:
+                sh_jobs.append((job.job_name, job.job_data))
 
         return sh_jobs
