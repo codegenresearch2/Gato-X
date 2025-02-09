@@ -45,6 +45,10 @@ class OrganizationEnum():
         org_private_repos = self.__assemble_repo_list(organization.name, ['private', 'internal'])
         org_public_repos = self.__assemble_repo_list(organization.name, ['public'])
 
+        # Explicitly handle the case where there are no private repositories
+        if not org_private_repos:
+            org_private_repos = []
+
         organization.set_public_repos(org_public_repos)
         organization.set_private_repos(org_private_repos)
 
