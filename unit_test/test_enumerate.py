@@ -2,7 +2,6 @@ import os
 import pathlib
 import pytest
 import json
-
 from unittest.mock import patch
 from gatox.models.repository import Repository
 from gatox.enumerate.enumerate import Enumerator
@@ -441,4 +440,4 @@ def test_enum_repos_empty(mock_api, capfd):
 @patch("gatox.enumerate.enumerate.Api")
 def test_bad_token(mock_api):
     gh_enumeration_runner = Enumerator(
-        "
+        "gh
