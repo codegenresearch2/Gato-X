@@ -20,6 +20,7 @@ class Organization():
         self.secrets: list[Secret] = []
         self.runners: list[Runner] = []
         self.sso_enabled = False
+        self.forking_options = {}
 
         self.limited_data = limited_data
 
@@ -52,17 +53,6 @@ class Organization():
         """
         self.secrets = secrets
 
-    def set_repository(self, repo: Repository):
-        """Add a single repository to the organization.
-
-        Args:
-            repo (Repository): Single repository object.
-        """
-        if repo.is_private():
-            self.private_repos.append(repo)
-        else:
-            self.public_repos.append(repo)
-
     def set_public_repos(self, repos: list[Repository]):
         """List of public repos for the org.
 
@@ -88,6 +78,14 @@ class Organization():
         """
         self.runners = runners
 
+    def set_forking_options(self, options: dict):
+        """Set forking options for the organization.
+
+        Args:
+            options (dict): Dictionary containing forking options.
+        """
+        self.forking_options = options
+
     def toJSON(self):
         """Converts the repository to a Gato JSON representation.
         """
@@ -106,7 +104,8 @@ class Organization():
                 "public_repos":
                     [repository.toJSON() for repository in self.public_repos],
                 "private_repos":
-                    [repository.toJSON() for repository in self.private_repos]
+                    [repository.toJSON() for repository in self.private_repos],
+                "forking_options": self.forking_options
             }
 
         return representation
