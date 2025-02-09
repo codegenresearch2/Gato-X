@@ -116,9 +116,8 @@ a user's entire access, individual organizations, or repositories."""
 
         Output.info(
             f"About to enumerate "
-            f"{len(organization.private_repos) + len(organization.public_repos)}"
-            " repos within "
-            f"the {organization.name} organization!"
+            f"{len(organization.private_repos) + len(organization.public_repos)} "
+            f"repos within the {organization.name} organization!"
         )
 
         Output.info(f"Querying and caching workflow YAML files!")
@@ -312,3 +311,5 @@ a user's entire access, individual organizations, or repositories."""
 
         if 'repo' not in self.user_perms['scopes']:
             Output.warn("Token does not have sufficient access to list orgs!")
+            return False
+    
