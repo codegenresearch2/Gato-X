@@ -137,6 +137,9 @@ class Enumerator:
             "organizations!"
         )
 
+        for org in orgs:
+            Output.tabbed(f"{Output.bright(org)}")
+
         return [
             Organization({"login": org}, self.user_perms["scopes"], True)
             for org in orgs
