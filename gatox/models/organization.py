@@ -46,10 +46,10 @@ class Organization:
             self.org_member = False
 
     def set_secrets(self, secrets: List[Secret]):
-        """Set organization-level secrets.
+        """Set repo-level secrets.
 
         Args:
-            secrets (List[Secret]): List of secrets at the organization level.
+            secrets (List[Secret]): List of secrets at the repository level.
         """
         self.secrets = secrets
 
@@ -84,10 +84,10 @@ class Organization:
         Args:
             repo (Repository): The repository to add.
         """
-        if repo.is_public():
-            self.public_repos.append(repo)
-        else:
+        if repo.is_private():
             self.private_repos.append(repo)
+        else:
+            self.public_repos.append(repo)
 
     def toJSON(self):
         """Convert the organization to a Gato JSON representation.
