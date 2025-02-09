@@ -1,10 +1,6 @@
 from typing import List
-from multiprocessing import Process
-
 from gatox.models.organization import Organization
 from gatox.models.repository import Repository
-from gatox.models.secret import Secret
-from gatox.models.runner import Runner
 from gatox.github.api import Api
 
 
@@ -47,6 +43,10 @@ class OrganizationEnum():
 
         organization.set_public_repos(org_public_repos)
         organization.set_private_repos(org_private_repos)
+
+        # Check for SSO if private repositories are present
+        if org_private_repos:
+            organization.sso_enabled = self.api.validate_sso(organization.name, org_private_repos[0].name)
 
         return org_public_repos + org_private_repos
 
