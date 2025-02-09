@@ -94,7 +94,7 @@ class Enumerator:
         orgs = self.api.check_organizations()
 
         Output.info(
-            f'The user { self.user_perms["user"] } belongs to {len(orgs)} ' 
+            f'The user { self.user_perms["user"] } belongs to {len(orgs)} '  
             'organizations!')
 
         for org in orgs:
@@ -121,7 +121,7 @@ class Enumerator:
         orgs = self.api.check_organizations()
 
         Output.info(
-            f'The user { self.user_perms["user"] } belongs to {len(orgs)} ' 
+            f'The user { self.user_perms["user"] } belongs to {len(orgs)} '  
             'organizations!')
 
         for org in orgs:
@@ -149,7 +149,7 @@ class Enumerator:
 
         if not details:
             Output.warn(
-                f"Unable to query the org: {Output.bright(org)}! Ensure the " 
+                f"Unable to query the org: {Output.bright(org)}! Ensure the "  
                 'organization exists!')
             return False
 
@@ -168,7 +168,7 @@ class Enumerator:
 
         Output.info(
             f"About to enumerate "
-            f'{len(organization.private_repos) + len(organization.public_repos)}' 
+            f'{len(organization.private_repos) + len(organization.public_repos)}'  
             ' repos within the {organization.name} organization!'")
 
         Output.info(f"Querying and caching workflow YAML files!")
@@ -181,9 +181,8 @@ class Enumerator:
             if result.status_code == 200:
                 DataIngestor.construct_workflow_cache(result.json()['data']['nodes'])
             else:
-                Output.warn(
-                    "GraphQL query failed, will revert to "
-                    'REST workflow query for impacted repositories!")
+                Output.warn("GraphQL query failed, will revert to "
+                            'REST workflow query for impacted repositories!')
         try:
             for repo in enum_list:
                 if repo.is_archived():
@@ -259,7 +258,7 @@ class Enumerator:
             return repo
         else:
             Output.warn(
-                f"Unable to enumerate {Output.bright(repo_name)}! It may not " 
+                f"Unable to enumerate {Output.bright(repo_name)}! It may not "  
                 'exist or the user does not have access.'")
             return False
 
@@ -292,7 +291,7 @@ class Enumerator:
                         break
                     else:
                         Output.warn(
-                            f"GraphQL query failed with {result.status_code} " 
+                            f"GraphQL query failed with {result.status_code} "  
                             f'on attempt {str(i+1)}, will try again!")
                         time.sleep(10)
                         Output.warn(f"Query size was: {len(wf_query)}")
@@ -300,7 +299,7 @@ class Enumerator:
                 print(e)
                 Output.warn(
                     "GraphQL query failed, will revert to REST "
-                    'workflow query for impacted repositories!")
+                    'workflow query for impacted repositories!'")
 
         repo_wrappers = []
         try:
