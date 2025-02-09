@@ -23,7 +23,7 @@ class DataIngestor:
             # Gato will fall back to the contents API for these few cases.
             if not result:
                 continue
-                        
+                            
             if 'nameWithOwner' not in result:
                 continue
 
@@ -69,6 +69,6 @@ class DataIngestor:
                 # Capture environments not named github-pages
                 envs = [env['node']['name']  for env in result['environments']['edges'] if env['node']['name'] != 'github-pages']
                 repo_data['environments'] = envs
-                            
+                             
             repo_wrapper = Repository(repo_data)
             cache.set_repository(repo_wrapper)
