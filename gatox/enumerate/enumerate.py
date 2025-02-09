@@ -169,7 +169,7 @@ class Enumerator:
             "organizations!"
         )
 
-        org_wrappers = list(map(self.enumerate_organization, orgs))
+        org_wrappers = [self.enumerate_organization(org) for org in orgs]
 
         return org_wrappers
 
