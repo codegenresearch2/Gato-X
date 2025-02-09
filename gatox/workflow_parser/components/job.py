@@ -60,8 +60,12 @@ class Job():
                     self.if_condition = f"EVALUATED: {self.if_condition}"
                 else:
                     self.if_condition = f"RESTRICTED: {self.if_condition}"
-            except (ValueError, NotImplementedError, SyntaxError, IndexError) as e:
-                self.if_condition = self.if_condition
+            except ValueError as ve:
+                self.if_condition = f"ERROR: {str(ve)}"
+            except NotImplementedError as ni:
+                self.if_condition = f"ERROR: {str(ni)}"
+            except (SyntaxError, IndexError) as e:
+                self.if_condition = f"ERROR: {str(e)}"
             finally:
                 self.evaluated = True
         return self.if_condition
@@ -87,5 +91,9 @@ class Job():
         """Check if the job is configured to use self-hosted runners.
         """
         if 'runs-on' in self.job_data:
-            return self.job_data['runs-on'].startswith('self-hosted')
+            runs_on = self.job_data['runs-on']
+            if isinstance(runs_on, list):
+                return any(runner.startswith('self-hosted') for runner in runs_on)
+            elif isinstance(runs_on, str):
+                return runs_on.startswith('self-hosted')
         return False
