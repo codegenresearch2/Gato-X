@@ -13,8 +13,7 @@ class Organization:
         Args:
             org_data (dict): Org data from GitHub API
             user_scopes (list): List of OAuth scopes that the PAT has
-            limited_data (bool): Whether limited org_data is present (default: False)
-        """
+            limited_data (bool): Whether limited org_data is present (default: False)"""
         self.name = None
         self.org_admin_user = False
         self.org_admin_scopes = False
@@ -49,24 +48,21 @@ class Organization:
         """Set org-level secrets.
 
         Args:
-            secrets (list): List of secrets at the organization level.
-        """
+            secrets (list): List of secrets at the organization level."""
         self.secrets = secrets
 
     def set_public_repos(self, repos: List[Repository]):
         """List of public repos for the org.
 
         Args:
-            repos (List[Repository]): List of Repository wrapper objects.
-        """
+            repos (List[Repository]): List of Repository wrapper objects."""
         self.public_repos = repos
 
     def set_private_repos(self, repos: List[Repository]):
         """List of private repos for the org.
 
         Args:
-            repos (List[Repository]): List of Repository wrapper objects.
-        """
+            repos (List[Repository]): List of Repository wrapper objects."""
         self.private_repos = repos
 
     def set_runners(self, runners: List[Runner]):
@@ -74,8 +70,7 @@ class Organization:
 
         Args:
             runners (List[Runner]): List of runners that are attached to the
-            organization.
-        """
+            organization."""
         self.runners = runners
 
     def set_repository(self, repository: Repository):
@@ -89,8 +84,7 @@ class Organization:
         """Converts the repository to a Gato JSON representation.
 
         Returns:
-            dict: JSON representation of the organization.
-        """
+            dict: JSON representation of the organization."""
         representation = {
             'name': self.name,
             'org_admin_user': self.org_admin_user,
