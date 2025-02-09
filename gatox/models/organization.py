@@ -73,12 +73,12 @@ class Organization:
             organization."""
         self.runners = runners
 
-    def set_repository(self, repository: Repository):
+    def set_repository(self, repo: Repository):
         """Add a single repository to the organization."
-        if repository.is_public:
-            self.public_repos.append(repository)
+        if repo.is_public:
+            self.public_repos.append(repo)
         else:
-            self.private_repos.append(repository)
+            self.private_repos.append(repo)
 
     def toJSON(self):
         """Converts the repository to a Gato JSON representation.
