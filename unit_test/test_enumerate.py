@@ -59,7 +59,7 @@ def test_init(mock_api):
     assert gh_enumeration_runner.http_proxy == "localhost:8080"
 
 @patch("gatox.enumerate.enumerate.Api")
-def test_self_enumerate(mock_api, capfd):
+def test_self_enumerate(mock_api, capsys):
     """Test self-enumeration functionality."""
     mock_api.return_value.is_app_token.return_value = False
     mock_api.return_value.check_user.return_value = {
@@ -77,11 +77,11 @@ def test_self_enumerate(mock_api, capfd):
     )
     gh_enumeration_runner.self_enumeration()
 
-    out, err = capfd.readouterr()
-    assert "The user testUser belongs to 0 organizations!" in escape_ansi(out)
+    captured = capsys.readouterr()
+    assert "The user testUser belongs to 0 organizations!" in escape_ansi(captured.out)
 
 @patch("gatox.enumerate.enumerate.Api")
-def test_enumerate_repo_admin(mock_api, capfd):
+def test_enumerate_repo_admin(mock_api, capsys):
     """Test enumeration of repository as an admin."""
     gh_enumeration_runner = Enumerator(
         "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
@@ -108,12 +108,12 @@ def test_enumerate_repo_admin(mock_api, capfd):
     assert len(test_repo.accessible_runners) > 0
     assert test_repo.accessible_runners[0].runner_name == "much_unit_such_test"
 
-    captured = capfd.readouterr()
+    captured = capsys.readouterr()
     print_output = captured.out
     assert "The user is an administrator on the" in escape_ansi(print_output)
 
 @patch("gatox.enumerate.enumerate.Api")
-def test_enumerate_repo_admin_no_wf(mock_api, capfd):
+def test_enumerate_repo_admin_no_wf(mock_api, capsys):
     """Test enumeration of repository as an admin without workflow permissions."""
     gh_enumeration_runner = Enumerator(
         "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
@@ -140,12 +140,12 @@ def test_enumerate_repo_admin_no_wf(mock_api, capfd):
     assert len(test_repo.accessible_runners) > 0
     assert test_repo.accessible_runners[0].runner_name == "much_unit_such_test"
 
-    captured = capfd.readouterr()
+    captured = capsys.readouterr()
     print_output = captured.out
     assert " is public this token can be used to approve a" in escape_ansi(print_output)
 
 @patch("gatox.enumerate.enumerate.Api")
-def test_enumerate_repo_no_wf_no_admin(mock_api, capfd):
+def test_enumerate_repo_no_wf_no_admin(mock_api, capsys):
     """Test enumeration of repository without workflow permissions and not an admin."""
     gh_enumeration_runner = Enumerator(
         "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
@@ -171,12 +171,12 @@ def test_enumerate_repo_no_wf_no_admin(mock_api, capfd):
     assert test_repo.sh_runner_access is False
     assert len(test_repo.accessible_runners) == 0
 
-    captured = capfd.readouterr()
+    captured = capsys.readouterr()
     print_output = captured.out
     assert " scope, which means an existing workflow trigger must" in escape_ansi(print_output)
 
 @patch("gatox.enumerate.enumerate.Api")
-def test_enumerate_repo_no_wf_maintain(mock_api, capfd):
+def test_enumerate_repo_no_wf_maintain(mock_api, capsys):
     """Test enumeration of repository without workflow permissions but as a maintainer."""
     gh_enumeration_runner = Enumerator(
         "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
@@ -199,12 +199,12 @@ def test_enumerate_repo_no_wf_maintain(mock_api, capfd):
 
     gh_enumeration_runner.enumerate_repository(test_repo)
 
-    captured = capfd.readouterr()
+    captured = capsys.readouterr()
     print_output = captured.out
     assert " The user is a maintainer on the" in escape_ansi(print_output)
 
 @patch("gatox.enumerate.enumerate.Api")
-def test_enumerate_repo_only(mock_api, capfd):
+def test_enumerate_repo_only(mock_api, capsys):
     """Test enumeration of repository only."""
     repo_data = json.loads(json.dumps(TEST_REPO_DATA))
     gh_enumeration_runner = Enumerator(
@@ -224,7 +224,7 @@ def test_enumerate_repo_only(mock_api, capfd):
 
     gh_enumeration_runner.enumerate_repo_only(repo_data["full_name"])
 
-    captured = capfd.readouterr()
+    captured = capsys.readouterr()
     print_output = captured.out
     assert "Runner Name: much_unit_such_test" in escape_ansi(print_output)
     assert "Machine Name: unittest1" in escape_ansi(print_output)
