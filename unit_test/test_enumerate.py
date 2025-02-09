@@ -6,6 +6,7 @@ from gatox.enumerate.enumerate import Enumerator
 from gatox.cli.output import Output
 import os
 import pathlib
+from unit_test.utils import escape_ansi
 
 TEST_REPO_DATA = None
 TEST_WORKFLOW_YML = None
@@ -491,6 +492,4 @@ def test_enum_repos_empty(mock_api, capfd):
     gh_enumeration_runner.enumerate_repos([])
     out, _ = capfd.readouterr()
     assert "The list of repositories was empty!" in escape_ansi(out)
-    mock_api.return_value.get_repository.assert_not_called()
-
-@patch("
+    mock_api.return_value.get_repository.
