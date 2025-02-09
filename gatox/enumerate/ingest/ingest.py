@@ -58,7 +58,7 @@ class DataIngestor:
                         result['viewerPermission'] == 'MAINTAIN' or \
                         result['viewerPermission'] == 'ADMIN',
                     'admin': result['viewerPermission'] == 'ADMIN',
-                    'maintain': result['viewerPermission'] == 'MAINTAIN'  # Added key
+                    'maintain': result['viewerPermission'] == 'MAINTAIN' or result['viewerPermission'] == 'ADMIN'  # Updated condition
                 },
                 'archived': result['isArchived'],
                 'isFork': result['isFork'],
