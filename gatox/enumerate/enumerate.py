@@ -75,4 +75,5 @@ a user's entire access, individual organizations, or repositories."""
             if len(self.user_perms["scopes"]):
                 Output.info(
                     "The GitHub Classic PAT has the following scopes: "
-                    f'{Output.yellow(", ".join(self.user_perms[
+                    f'{Output.yellow(", ".join(self.user_perms["scopes"]))}'
+                )
