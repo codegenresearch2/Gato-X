@@ -48,7 +48,7 @@ def load_test_files(request):
 
 @patch("gatox.enumerate.enumerate.Api")
 def test_init(mock_api):
-    """Test constructor for enumerator."""
+    """Test the constructor for the enumerator."""
     gh_enumeration_runner = Enumerator(
         "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         socks_proxy=None,
@@ -60,7 +60,7 @@ def test_init(mock_api):
 
 @patch("gatox.enumerate.enumerate.Api")
 def test_self_enumerate(mock_api, capsys):
-    """Test self-enumeration functionality."""
+    """Test the self-enumeration functionality."""
     mock_api.return_value.is_app_token.return_value = False
     mock_api.return_value.check_user.return_value = {
         "user": "testUser",
@@ -433,4 +433,4 @@ def test_enum_repos_empty(mock_api, capfd):
         socks_proxy=None,
         http_proxy=None,
         output_yaml=False,
-        skip_log=True,
+        skip_log=
