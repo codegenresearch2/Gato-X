@@ -13,13 +13,13 @@ class Organization():
             user_scopes (list): List of OAuth scopes that the PAT has
             limited_data (bool): Whether limited org_data is present (default: False)
         """
+        self.name = org_data['login']  # Initialize name to None
         self.org_admin_user = False
         self.org_admin_scopes = False
         self.org_member = False
         self.secrets: list[Secret] = []
         self.runners: list[Runner] = []
         self.sso_enabled = False
-        self.name = None  # Initialize name to None
         self.limited_data = limited_data
         self.public_repos: list[Repository] = []
         self.private_repos: list[Repository] = []
@@ -39,8 +39,6 @@ class Organization():
         else:
             self.org_admin_user = False
             self.org_member = False
-
-        self.name = org_data['login']  # Assign name after initialization
 
     def set_secrets(self, secrets: list[Secret]):
         """Set repo-level secrets.
@@ -76,7 +74,7 @@ class Organization():
         self.runners = runners
 
     def set_repository(self, repo: Repository):
-        """Add a single repository object.
+        """Add a single repository to the organization.
 
         Args:
             repo (Repository): The repository to be added.
@@ -87,7 +85,7 @@ class Organization():
             self.public_repos.append(repo)
 
     def toJSON(self):
-        """Converts the repository to a Gato JSON representation.
+        """Converts the organization to a Gato JSON representation.
         """
         if self.limited_data:
             representation = {
