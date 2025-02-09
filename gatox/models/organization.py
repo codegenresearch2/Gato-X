@@ -19,10 +19,10 @@ class Organization():
         self.secrets: list[Secret] = []
         self.runners: list[Runner] = []
         self.sso_enabled = False
+        self.name = None  # Initialize name to None
+        self.limited_data = limited_data
         self.public_repos: list[Repository] = []
         self.private_repos: list[Repository] = []
-        self.limited_data = limited_data
-        self.name = org_data['login']
 
         # If fields such as billing email are populated, then the user MUST
         # be an organization owner. If not, then the user is a member (for
@@ -39,6 +39,8 @@ class Organization():
         else:
             self.org_admin_user = False
             self.org_member = False
+
+        self.name = org_data['login']  # Assign name after initialization
 
     def set_secrets(self, secrets: list[Secret]):
         """Set repo-level secrets.
@@ -74,7 +76,7 @@ class Organization():
         self.runners = runners
 
     def set_repository(self, repo: Repository):
-        """Add a single repository to the organization.
+        """Add a single repository object.
 
         Args:
             repo (Repository): The repository to be added.
