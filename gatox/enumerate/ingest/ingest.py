@@ -61,7 +61,7 @@ class DataIngestor:
                 },
                 'archived': result['isArchived'],
                 'isFork': result['isFork'],
-                'allow_forking': result['allowForking'],
+                'allow_forking': result['allowForking'], # Ensure this matches the gold code
                 'environments': []
             }
 
@@ -69,6 +69,6 @@ class DataIngestor:
                 # Capture environments not named github-pages
                 envs = [env['node']['name']  for env in result['environments']['edges'] if env['node']['name'] != 'github-pages']
                 repo_data['environments'] = envs
-                           
+                            
             repo_wrapper = Repository(repo_data)
             cache.set_repository(repo_wrapper)
