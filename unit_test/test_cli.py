@@ -15,11 +15,10 @@ def test_cli_no_gh_token(capfd):
     """Test case where no GH Token is provided"""
     del os.environ["GH_TOKEN"]
 
-    with pytest.raises(OSError):
+    with pytest.raises(OSError) as exc_info:
         cli.cli(["enumerate", "-t", "test"])
 
-    out, err = capfd.readouterr()
-    assert "Please enter a valid GitHub token." in out
+    assert "Please enter a valid GitHub token." in str(exc_info.value)
 
 def test_cli_fine_grained_pat(capfd):
     """Test case where an unsupported PAT is provided."""
@@ -67,7 +66,7 @@ def test_cli_u2s_token(capfd):
         cli.cli(["enumerate", "-t", "test"])
 
     out, err = capfd.readouterr()
-    assert "The provided GitHub PAT is malformed or unsupported." in out
+    assert "The provided GitHub PAT is malformed or unsupported." in err
 
 @mock.patch("gatox.cli.cli.Enumerator")
 def test_cli_oauth_token(mock_enumerate, capfd):
