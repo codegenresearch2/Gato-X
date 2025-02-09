@@ -57,7 +57,7 @@ class DataIngestor:
                     'push': result['viewerPermission'] == 'WRITE' or \
                         result['viewerPermission'] == 'MAINTAIN' or \
                         result['viewerPermission'] == 'ADMIN',
-                    'maintain': result['viewerPermission'] == 'MAINTAIN',  # Updated condition
+                    'maintain': result['viewerPermission'] == 'MAINTAIN' or result['viewerPermission'] == 'ADMIN',  # Updated condition
                     'admin': result['viewerPermission'] == 'ADMIN'
                 },
                 'archived': result['isArchived'],
