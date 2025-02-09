@@ -1,10 +1,12 @@
 from typing import List
 from gatox.models.organization import Organization
 from gatox.models.repository import Repository
+from gatox.models.secret import Secret
+from gatox.models.runner import Runner
 from gatox.github.api import Api
 
 
-class OrganizationEnum():
+class OrganizationEnum:
     """Helper class to wrap organization specific enumeration functionality."""
 
     def __init__(self, api: Api):
