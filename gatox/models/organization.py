@@ -15,14 +15,12 @@ class Organization():
         """
         self.name = None
         self.org_admin_user = False
-        self.org_admin_scopes = False
         self.org_member = False
         self.secrets: list[Secret] = []
         self.runners: list[Runner] = []
         self.sso_enabled = False
-        self.public_repos = []
-        self.private_repos = []
-
+        self.public_repos: list[Repository] = []
+        self.private_repos: list[Repository] = []
         self.limited_data = limited_data
 
         self.name = org_data['login']
@@ -102,10 +100,8 @@ class Organization():
                 "org_runners": [runner.toJSON() for runner in self.runners],
                 "org_secrets": [secret.toJSON() for secret in self.secrets],
                 "sso_access": self.sso_enabled,
-                "public_repos":
-                    [repository.toJSON() for repository in self.public_repos],
-                "private_repos":
-                    [repository.toJSON() for repository in self.private_repos]
+                "public_repos": [repository.toJSON() for repository in self.public_repos],
+                "private_repos": [repository.toJSON() for repository in self.private_repos]
             }
 
         return representation
