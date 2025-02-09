@@ -4,6 +4,8 @@ from unittest.mock import patch
 from gatox.models.repository import Repository
 from gatox.enumerate.enumerate import Enumerator
 from gatox.cli.output import Output
+import os
+import pathlib
 
 TEST_REPO_DATA = None
 TEST_WORKFLOW_YML = None
@@ -57,7 +59,7 @@ def test_init(mock_api):
 
 @patch("gatox.enumerate.enumerate.Api")
 def test_self_enumerate(mock_api, capsys):
-    """Test constructor for enumerator."""
+    """Test self-enumeration method."""
     mock_api.return_value.is_app_token.return_value = False
 
     mock_api.return_value.check_user.return_value = {
@@ -84,7 +86,7 @@ def test_self_enumerate(mock_api, capsys):
 
 @patch("gatox.enumerate.enumerate.Api")
 def test_enumerate_repo_admin(mock_api, capsys):
-    """Test constructor for enumerator."""
+    """Test enumeration of repository as admin."""
     gh_enumeration_runner = Enumerator(
         "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         socks_proxy=None,
@@ -117,7 +119,7 @@ def test_enumerate_repo_admin(mock_api, capsys):
 
 @patch("gatox.enumerate.enumerate.Api")
 def test_enumerate_repo_admin_no_wf(mock_api, capsys):
-    """Test constructor for enumerator."""
+    """Test enumeration of repository as admin without workflow."""
     gh_enumeration_runner = Enumerator(
         "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         socks_proxy=None,
@@ -150,7 +152,7 @@ def test_enumerate_repo_admin_no_wf(mock_api, capsys):
 
 @patch("gatox.enumerate.enumerate.Api")
 def test_enumerate_repo_no_wf_no_admin(mock_api, capsys):
-    """Test constructor for enumerator."""
+    """Test enumeration of repository without workflow and without admin."""
     gh_enumeration_runner = Enumerator(
         "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         socks_proxy=None,
@@ -183,7 +185,7 @@ def test_enumerate_repo_no_wf_no_admin(mock_api, capsys):
 
 @patch("gatox.enumerate.enumerate.Api")
 def test_enumerate_repo_no_wf_maintain(mock_api, capsys):
-    """Test constructor for enumerator."""
+    """Test enumeration of repository without workflow and as maintainer."""
     gh_enumeration_runner = Enumerator(
         "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         socks_proxy=None,
@@ -216,7 +218,7 @@ def test_enumerate_repo_no_wf_maintain(mock_api, capsys):
 
 @patch("gatox.enumerate.enumerate.Api")
 def test_enumerate_repo_only(mock_api, capsys):
-    """Test constructor for enumerator."""
+    """Test enumeration of repository."""
     repo_data = json.loads(json.dumps(TEST_REPO_DATA))
     gh_enumeration_runner = Enumerator(
         "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
@@ -491,5 +493,4 @@ def test_enum_repos_empty(mock_api, capfd):
     assert "The list of repositories was empty!" in escape_ansi(out)
     mock_api.return_value.get_repository.assert_not_called()
 
-@patch("gatox.enumerate.enumerate.Api")
-def test_bad_token(mock_api
+@patch("
