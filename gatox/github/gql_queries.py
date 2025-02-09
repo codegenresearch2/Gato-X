@@ -1,6 +1,5 @@
-class GqlQueries():
-    """Constructs graphql queries for use with the GitHub GraphQL api.
-    """
+class GqlQueries:
+    """Constructs graphql queries for use with the GitHub GraphQL api."""
 
     GET_YMLS_WITH_SLUGS = """
     fragment repoWorkflows on Repository {
@@ -11,7 +10,6 @@ class GqlQueries():
         isPrivate
         isArchived
         viewerPermission
-        forkingAllowed
         url
         isFork
         pushedAt
@@ -43,7 +41,6 @@ class GqlQueries():
                 nameWithOwner
                 isPrivate
                 isArchived
-                forkingAllowed
                 stargazers {
                     totalCount
                 }
@@ -75,42 +72,40 @@ class GqlQueries():
     """
 
     GET_YMLS_ENV = """
-        query RepoFiles($node_ids: [ID!]!) {
-            nodes(ids: $node_ids) {
-                ... on Repository {
-                    nameWithOwner
-                    isPrivate
-                    isArchived
-                    forkingAllowed
-                    stargazers {
-                        totalCount
-                    }
-                    viewerPermission
-                    pushedAt
-                    url
-                    isFork
-                    environments(first: 100) {
-                        edges {
-                        node {
-                            id
-                            name
-                        }
-                    }
-                    }
-                    defaultBranchRef {
+    query RepoFiles($node_ids: [ID!]!) {
+        nodes(ids: $node_ids) {
+            ... on Repository {
+                nameWithOwner
+                isPrivate
+                isArchived
+                stargazers {
+                    totalCount
+                }
+                viewerPermission
+                pushedAt
+                url
+                isFork
+                environments(first: 100) {
+                    edges {
+                    node {
+                        id
                         name
                     }
-                    object(expression: "HEAD:.github/workflows/") {
-                        ... on Tree {
-                            entries {
-                                name
-                                type
-                                mode
-                                object {
-                                    ... on Blob {
-                                        byteSize
-                                        text
-                                    }
+                    }
+                }
+                defaultBranchRef {
+                    name
+                }
+                object(expression: "HEAD:.github/workflows/") {
+                    ... on Tree {
+                        entries {
+                            name
+                            type
+                            mode
+                            object {
+                                ... on Blob {
+                                    byteSize
+                                    text
                                 }
                             }
                         }
@@ -118,6 +113,7 @@ class GqlQueries():
                 }
             }
         }
+    }
     """
 
     @staticmethod
@@ -150,10 +146,9 @@ class GqlQueries():
             for j, repo in enumerate(chunk):
                 owner, name = repo.split('/')
                 repo_query = f"""
-                repo{j + 1}: repository(owner: "{owner}", name: "{name}") {{
+                repo{j + 1}: repository(owner: \"{owner}\", name: \"{name}\") {{
                     ...repoWorkflows
-                }}
-                """
+                }}"""
                 repo_queries.append(repo_query)
 
             queries.append(
@@ -182,7 +177,7 @@ class GqlQueries():
             query = {
                 # We list envs if we have write access to one in the set (for secrets
                 # reasons, otherwise we don't list them)
-                "query": GqlQueries.GET_YMLS_ENV if repos[i].can_push() else GqlQueries.GET_YMLS,
+                "query": GqlQueries.GET_YMLS_ENV if any(repo.can_push() for repo in repos[0+100*i:top_len]) else GqlQueries.GET_YMLS,
                 "variables": {
                     "node_ids": [
                         repo.repo_data['node_id'] for repo in repos[0+100*i:top_len]
