@@ -72,7 +72,7 @@ class Repository():
         Returns:
             bool: True if the repository is private, False otherwise.
         """
-        return self.repo_data['private']
+        return self.repo_data.get('private', False)
     
     def is_archived(self) -> bool:
         """Check if the repository is archived.
@@ -80,7 +80,7 @@ class Repository():
         Returns:
             bool: True if the repository is archived, False otherwise.
         """
-        return self.repo_data['archived']
+        return self.repo_data.get('archived', False)
 
     def is_internal(self) -> bool:
         """Check if the repository is internal.
@@ -88,7 +88,7 @@ class Repository():
         Returns:
             bool: True if the repository is internal, False otherwise.
         """
-        return self.repo_data['visibility'] == 'internal'
+        return self.repo_data.get('visibility', '') == 'internal'
 
     def is_public(self) -> bool:
         """Check if the repository is public.
@@ -96,7 +96,7 @@ class Repository():
         Returns:
             bool: True if the repository is public, False otherwise.
         """
-        return self.repo_data['visibility'] == 'public'
+        return self.repo_data.get('visibility', '') == 'public'
     
     def is_fork(self) -> bool:
         """Check if the repository is a fork.
@@ -104,7 +104,7 @@ class Repository():
         Returns:
             bool: True if the repository is a fork, False otherwise.
         """
-        return self.repo_data['fork']
+        return self.repo_data.get('fork', False)
 
     def can_fork(self) -> bool:
         """Check if the repository allows forking.
