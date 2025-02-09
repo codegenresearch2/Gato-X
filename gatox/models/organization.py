@@ -53,7 +53,7 @@ class Organization:
         self.runners = runners
 
     def toJSON(self):
-        """Converts the repository to a Gato JSON representation."""
+        """Converts the repository to a Gato JSON representation."
         if self.limited_data:
             representation = {
                 "name": self.name
