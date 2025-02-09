@@ -37,16 +37,46 @@ class Job():
         self.job_name = job_name
         self.job_data = job_data
         self.needs = job_data.get('needs', [])
-        self.steps = [Step(step) for step in job_data.get('steps', [])]
-        self.env = job_data.get('env', {})
-        self.permissions = job_data.get('permissions', [])
-        self.deployments = job_data.get('environment', [])
-        self.if_condition = job_data.get('if')
-        self.uses = job_data.get('uses')
-        self.caller = self.uses and self.uses.startswith('./')
-        self.external_caller = self.uses and not self.caller
-        self.has_gate = any(step.is_gate for step in self.steps)
+        self.steps = []
+        self.env = {}
+        self.permissions = []
+        self.deployments = []
+        self.if_condition = None
+        self.uses = None
+        self.caller = False
+        self.external_caller = False
+        self.has_gate = False
         self.evaluated = False
+
+        # Initialize steps as an empty list
+        if 'steps' in job_data:
+            self.steps = [Step(step) for step in job_data['steps']]
+            self.has_gate = any(step.is_gate for step in self.steps)
+
+        # Initialize environment variables
+        if 'env' in job_data:
+            self.env = job_data['env']
+
+        # Initialize permissions
+        if 'permissions' in job_data:
+            self.permissions = job_data['permissions']
+
+        # Initialize deployment environments
+        if 'environment' in job_data:
+            if isinstance(job_data['environment'], list):
+                self.deployments.extend(job_data['environment'])
+            else:
+                self.deployments.append(job_data['environment'])
+
+        # Initialize if condition
+        if 'if' in job_data:
+            self.if_condition = job_data['if']
+
+        # Initialize uses
+        if 'uses' in job_data:
+            self.uses = job_data['uses']
+            self.caller = self.uses.startswith('./')
+            self.external_caller = not self.caller
 
     def evaluateIf(self):
         """Evaluate the If expression by parsing it into an AST
