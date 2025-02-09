@@ -61,7 +61,7 @@ class DataIngestor:
                 },
                 'archived': result['isArchived'],
                 'isFork': result['isFork'],
-                'allow_forking': result['allowForking'],  # Added key
+                'allow_forking': result['allowForking'],  # Ensure this key matches the gold code
                 'environments': []
             }
 
