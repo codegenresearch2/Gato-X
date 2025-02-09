@@ -1,5 +1,4 @@
 import datetime
-
 from gatox.models.runner import Runner
 from gatox.models.secret import Secret
 
@@ -48,7 +47,7 @@ class Repository():
         return self.permission_data.get('pull', False)
 
     def is_private(self):
-        return self.repo_data['visibility'] != 'public'
+        return self.repo_data['private']
     
     def is_archived(self):
         return self.repo_data['archived']
@@ -144,8 +143,7 @@ class Repository():
             "can_fork": self.can_fork(),
             "stars": self.repo_data['stargazers_count'],
             "runner_workflows": [wf for wf in self.sh_workflow_names],
-            "accessible_runners": [runner.toJSON() for runner
-                                   in self.accessible_runners],
+            "accessible_runners": [runner.toJSON() for runner in self.accessible_runners],
             "repo_runners": [runner.toJSON() for runner in self.runners],
             "repo_secrets": [secret.toJSON() for secret in self.secrets],
             "org_secrets": [secret.toJSON() for secret in self.org_secrets],
