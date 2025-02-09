@@ -15,10 +15,9 @@ limitations under the License.
 """
 
 import logging
-
-from pathlib import Path
-import os
 import re
+import os
+from pathlib import Path
 
 from gatox.configuration.configuration_manager import ConfigurationManager
 from gatox.workflow_parser.utility import filter_tokens, decompose_action_ref
@@ -27,11 +26,10 @@ from gatox.models.workflow import Workflow
 
 logger = logging.getLogger(__name__)
 
-
 class WorkflowParser():
     """Parser for YML files.
 
-    This class is structurd to take a yaml file as input, it will then
+    This class is structured to take a yaml file as input, it will then
     expose methods that aim to answer questions about the yaml file.
 
     This will allow for growing what kind of analytics this tool can perform
@@ -45,25 +43,18 @@ class WorkflowParser():
         """Initialize class with workflow file.
 
         Args:
-            workflow_yml (str): String containing yaml file read in from
-            repository.
-            repo_name (str): Name of the repository.
-            workflow_name (str): name of the workflow file
+            workflow_wrapper (Workflow): Workflow object containing parsed YAML data.
+            non_default (str, optional): Non-default branch to analyze. Defaults to None.
         """
         if workflow_wrapper.isInvalid():
             raise ValueError("Received invalid workflow!")
 
         self.parsed_yml = workflow_wrapper.parsed_yml
-        
-        if 'jobs' in self.parsed_yml and self.parsed_yml['jobs'] is not None:
-            self.jobs = [Job(job_data, job_name) for job_name, job_data in self.parsed_yml.get('jobs', []).items()]
-        else:
-            self.jobs = []  
+        self.jobs = [Job(job_data, job_name) for job_name, job_data in self.parsed_yml.get('jobs', {}).items()]
         self.raw_yaml = workflow_wrapper.workflow_contents
         self.repo_name = workflow_wrapper.repo_name
         self.wf_name = workflow_wrapper.workflow_name
         self.callees = []
-        self.sh_callees = []
         self.external_ref = False
        
         if workflow_wrapper.special_path:
@@ -77,7 +68,6 @@ class WorkflowParser():
 
         self.composites = self.extract_referenced_actions()
 
-
     def is_referenced(self):
         return self.external_ref
 
@@ -89,7 +79,12 @@ class WorkflowParser():
         Returns:
             bool: Whether the workflow has the specified trigger.
         """
-        return self.get_vulnerable_triggers(trigger)
+        triggers = self.parsed_yml.get('on', {})
+        if isinstance(triggers, list):
+            return trigger in triggers
+        elif isinstance(triggers, dict):
+            return any(trigger == t for t in triggers)
+        return False
 
     def output(self, dirpath: str):
         """Write this yaml file out to the provided directory.
@@ -100,35 +95,22 @@ class WorkflowParser():
         Returns:
             bool: Whether the file was successfully written.
         """
-        Path(os.path.join(dirpath, f'{self.repo_name}')).mkdir(
-            parents=True, exist_ok=True)
+        Path(os.path.join(dirpath, f'{self.repo_name}')).mkdir(parents=True, exist_ok=True)
 
-        with open(os.path.join(
-                dirpath, f'{self.repo_name}/{self.wf_name}'), 'w') as wf_out:
+        with open(os.path.join(dirpath, f'{self.repo_name}/{self.wf_name}'), 'w') as wf_out:
             wf_out.write(self.raw_yaml)
             return True
         
     def extract_referenced_actions(self):
-        """
-        Extracts composite actions from the workflow file.
+        """Extracts composite actions from the workflow file.
         """
         referenced_actions = {}
-        vulnerable_triggers = self.get_vulnerable_triggers()
-        if not vulnerable_triggers:
-            return referenced_actions
-
-        if 'jobs' not in self.parsed_yml:
-            return referenced_actions
-        
         for job in self.jobs:
             for step in job.steps:
-                # Local action referenced
                 if step.type == 'ACTION':
                     action_parts = decompose_action_ref(step.uses, step.step_data, self.repo_name)
-                    # Save off by uses as key
                     if action_parts:
                         referenced_actions[step.uses] = action_parts
-            
         return referenced_actions
 
     def get_vulnerable_triggers(self, alternate=False):
@@ -138,62 +120,32 @@ class WorkflowParser():
             list: List of triggers within the workflow that could be vulnerable
             to GitHub Actions script injection vulnerabilities.
         """
-        vulnerable_triggers = []
-        risky_triggers = ['pull_request_target', 'workflow_run', 
-                          'issue_comment', 'issues', 'discussion_comment', 'discussion'
-                          'fork', 'watch']
+        risky_triggers = ['pull_request_target', 'workflow_run', 'issue_comment', 'issues', 'discussion_comment', 'discussion', 'fork', 'watch']
         if alternate:
             risky_triggers = [alternate]
 
-        if not self.parsed_yml or 'on' not in self.parsed_yml:
-            return vulnerable_triggers
-        triggers = self.parsed_yml['on']
-        if isinstance(triggers, list):
-            for trigger in triggers:
-                if trigger in risky_triggers:
-                    vulnerable_triggers.append(trigger)
-        elif isinstance(triggers, dict):
-            for trigger, trigger_conditions in triggers.items():
-                if trigger in risky_triggers:
-                    if trigger_conditions and 'types' in trigger_conditions:
-                        if 'labeled' in trigger_conditions['types'] and \
-                            len(trigger_conditions['types']) == 1:
-                            vulnerable_triggers.append(f"{trigger}:{trigger_conditions['types'][0]}")
-                        else:
-                            vulnerable_triggers.append(trigger)
-                    else:
-                        vulnerable_triggers.append(trigger)
+        triggers = self.parsed_yml.get('on', {})
+        vulnerable_triggers = [trigger for trigger in risky_triggers if trigger in triggers]
 
         return vulnerable_triggers
 
     def backtrack_gate(self, needs_name):
         """Attempts to find if a job needed by a specific job has a gate check.
         """
-        if type(needs_name) == list:
-            for need in needs_name:
-                if self.backtrack_gate(need):
-                    return True
-            return False
-        else:
-            for job in self.jobs:
-                if job.job_name == needs_name and job.gated():
-                    return True
-                # If the job it needs does't have a gate, then check if it does.
-                elif job.job_name == needs_name and not job.gated():
-                    return self.backtrack_gate(job.needs)
+        for job in self.jobs:
+            if job.job_name == needs_name and job.gated():
+                return True
+            elif job.job_name == needs_name and not job.gated():
+                return self.backtrack_gate(job.needs)
         return False
 
     def analyze_checkouts(self):
-        """Analyze if any steps within the workflow utilize the 
-        'actions/checkout' action with a 'ref' parameter.
+        """Analyze if any steps within the workflow utilize the 'actions/checkout' action with a 'ref' parameter.
 
         Returns:
             job_checkouts: List of 'ref' values within the 'actions/checkout' steps.
         """
         job_checkouts = {}
-        if 'jobs' not in self.parsed_yml:
-            return job_checkouts
-        
         for job in self.jobs:
             job_content = {
                 "check_steps": [],
@@ -204,46 +156,25 @@ class WorkflowParser():
             step_details = []
             bump_confidence = False
 
-            if job.isCaller():
-                self.callees.append(job.uses.split('/')[-1])
-            elif job.external_caller:
-                self.callees.append(job.uses)
-
             if job_content['if_check'] and job_content['if_check'].startswith("RESTRICTED"):
                 job_content['gated'] = True
 
             for step in job.steps:
-                # If the step is a gate, exit now, we can't reach the rest of the job.
                 if step.is_gate:
                     job_content['gated'] = True
                 elif step.is_checkout:
-                    # Check if the dependant jobs are gated.
-                    if job.needs:
-                        job_content['gated'] = self.backtrack_gate(job.needs)
-                    # If the step is a checkout and the ref is pr sha, then no TOCTOU is possible.
-                    if job_content['gated'] and ('github.event.pull_request.head.sha' in step.metadata.lower() 
-                                                 or ('sha' in step.metadata.lower() 
-                                                 and 'env.' in step.metadata.lower())):
-                        # Break out of this job.
+                    if job_content['gated'] and ('github.event.pull_request.head.sha' in step.metadata.lower() or 'sha' in step.metadata.lower()):
                         break
                     else:
                         if_check = step.evaluateIf()   
                         if if_check and if_check.startswith('EVALUATED'):
                             bump_confidence = True
                         elif if_check and 'RESTRICTED' in if_check:
-                            # In the future, we will exit here.
                             bump_confidence = False
-                        elif if_check == '':
-                            pass
                         step_details.append({"ref": step.metadata, "if_check": if_check, "step_name": step.name})
 
                 elif step_details and step.is_sink:
-                    # Confirmed sink, so set to HIGH if reachable via expression parser or no check at all
-                    job_content['confidence'] = 'HIGH' if \
-                        (job_content['if_check'] and job_content['if_check'].startswith('EVALUATED')) \
-                        or (bump_confidence and not job_content['if_check']) \
-                        or (not job_content['if_check'] and (not step.evaluateIf() or step.evaluateIf().startswith('EVALUATED'))) \
-                        else 'MEDIUM'
+                    job_content['confidence'] = 'HIGH' if (job_content['if_check'] and job_content['if_check'].startswith('EVALUATED')) or bump_confidence or (not job_content['if_check'] and (not step.evaluateIf() or step.evaluateIf().startswith('EVALUATED'))) else 'MEDIUM'
 
             job_content["check_steps"] = step_details
             job_checkouts[job.job_name] = job_content
@@ -254,8 +185,7 @@ class WorkflowParser():
         """Check for potential pwn request vulnerabilities.
 
         Returns:
-            dict: A dictionary containing the job names as keys and a 
-            list of potentially vulnerable tokens as values.
+            dict: A dictionary containing the job names as keys and a list of potentially vulnerable tokens as values.
         """
         vulnerable_triggers = self.get_vulnerable_triggers()
         if not vulnerable_triggers and not bypass:
@@ -266,19 +196,15 @@ class WorkflowParser():
 
         checkout_info = self.analyze_checkouts()
         for job_name, job_content in checkout_info.items():
-
             steps_risk = job_content['check_steps']
             if steps_risk:
-                
-                candidates[job_name] = {}
-                candidates[job_name]['confidence'] = job_content['confidence']
-                candidates[job_name]['gated'] = job_content['gated']
-                candidates[job_name]['steps'] = steps_risk
-                if 'if_check' in job_content and job_content['if_check']:
-                    candidates[job_name]['if_check'] = job_content['if_check']
-                else:
-                    candidates[job_name]['if_check'] = ''
-                
+                candidates[job_name] = {
+                    "confidence": job_content['confidence'],
+                    "gated": job_content['gated'],
+                    "steps": steps_risk,
+                    "if_check": job_content['if_check']
+                }
+
         if candidates:
             checkout_risk['candidates'] = candidates
             checkout_risk['triggers'] = vulnerable_triggers
@@ -305,8 +231,7 @@ class WorkflowParser():
         """Check for potential script injection vulnerabilities.
 
         Returns:
-            dict: A dictionary containing the job names as keys and a list 
-            of potentially vulnerable tokens as values.
+            dict: A dictionary containing the job names as keys and a list of potentially vulnerable tokens as values.
         """
         vulnerable_triggers = self.get_vulnerable_triggers()
         if not vulnerable_triggers and not bypass:
@@ -315,31 +240,23 @@ class WorkflowParser():
         injection_risk = {}
 
         for job in self.jobs:
-
             for step in job.steps:
-                # No TOCTOU possible for injection
                 if step.is_gate:
                     break
 
-                # Check if we marked the step as being an injectable script of some kind.
                 if step.is_script:
                     tokens = step.getTokens()
-                else:
-                    continue
-                tokens = filter_tokens(tokens)
+                    tokens = filter_tokens(tokens)
                 
                 def check_token(token, container):
                     if token.startswith('env.') and token.split('.')[1] in container['env']:
                         value = container['env'][token.split('.')[1]]
-
-                        if value and type(value) not in [int, float] and '${{' in value:
+                        if value and '${{' in value:
                             return True
                         else:
                             return False
                     return True
-                # Remove tokens that map to workflow or job level environment variables, as
-                # these will not be vulnerable to injection unless they reference
-                # something by context expression.
+
                 env_sources = [self.parsed_yml, job.job_data, step.step_data]
                 for env_source in env_sources:
                     if 'env' in env_source and tokens:
@@ -367,18 +284,35 @@ class WorkflowParser():
         """Analyze if any jobs within the workflow utilize self-hosted runners.
 
         Returns:
-           list: List of jobs within the workflow that utilize self-hosted
-           runners.
+           list: List of jobs within the workflow that utilize self-hosted runners.
         """
         sh_jobs = []
 
         for job in self.jobs:
-            if job.isSelfHosted():
-                sh_jobs.append((job.job_name,job.job_data))
-            elif job.isCaller(): 
-                if job.external_caller:
-                    self.sh_callees.append(job.uses)   
+            if 'runs-on' in job.job_data:
+                runs_on = job.job_data['runs-on']
+                if 'self-hosted' in runs_on:
+                    sh_jobs.append((job.job_name, job.job_data))
+                elif 'matrix.' in runs_on:
+                    matrix_match = re.search(r'{{\s*matrix\.([\w-]+)\s*}}', runs_on)
+                    if matrix_match:
+                        matrix_key = matrix_match.group(1)
+                        if 'strategy' in job.job_data and 'matrix' in job.job_data['strategy']:
+                            matrix = job.job_data['strategy']['matrix']
+                            if matrix_key in matrix:
+                                os_list = matrix[matrix_key]
+                                for key in os_list:
+                                    if key not in ConfigurationManager().WORKFLOW_PARSING['GITHUB_HOSTED_LABELS'] and not self.LARGER_RUNNER_REGEX_LIST.match(key):
+                                        sh_jobs.append((job.job_name, job.job_data))
+                                        break
                 else:
-                    self.sh_callees.append(job.uses.split('/')[-1])
+                    if isinstance(runs_on, list):
+                        for label in runs_on:
+                            if label not in ConfigurationManager().WORKFLOW_PARSING['GITHUB_HOSTED_LABELS'] and not self.LARGER_RUNNER_REGEX_LIST.match(label):
+                                sh_jobs.append((job.job_name, job.job_data))
+                                break
+                    elif isinstance(runs_on, str):
+                        if runs_on not in ConfigurationManager().WORKFLOW_PARSING['GITHUB_HOSTED_LABELS'] and not self.LARGER_RUNNER_REGEX_LIST.match(runs_on):
+                            sh_jobs.append((job.job_name, job.job_data))
 
         return sh_jobs
