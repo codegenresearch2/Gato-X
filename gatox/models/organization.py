@@ -79,7 +79,7 @@ class Organization:
         self.runners = runners
 
     def set_repository(self, repository: Repository):
-        """Add a single repository to the organization."""
+        """Add a single repository to the organization."
         if repository.is_public:
             self.public_repos.append(repository)
         else:
