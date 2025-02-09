@@ -124,23 +124,20 @@ class Enumerator:
     def validate_only(self):
         """Validates the PAT access and exits."""
         if not self.__setup_user_info():
-            return False, []
+            return False
 
         if "repo" not in self.user_perms["scopes"]:
             Output.warn("Token does not have sufficient access to list orgs!")
-            return False, []
+            return False
 
         orgs = self.api.check_organizations()
 
-        Output.info(
-            f'The user { self.user_perms["user"] } belongs to {len(orgs)} '
-            "organizations!"
-        )
+        if not orgs:
+            Output.info(
+                f'The user { self.user_perms["user"] } belongs to 0 organizations!'
+            )
 
-        for org in orgs:
-            Output.tabbed(f"{Output.bright(org)}")
-
-        return True, [Organization({"login": org}, self.user_perms["scopes"], True) for org in orgs]
+        return True, orgs
 
     def self_enumeration(self):
         """Enumerates all organizations associated with the authenticated user.
@@ -158,8 +155,8 @@ class Enumerator:
         Output.info("Enumerating user owned repositories!")
 
         repos = self.api.get_own_repos()
-        orgs, repos_list = self.enumerate_repos(repos)
-        return True, (orgs, repos_list)
+        orgs, repo_wrappers = self.enumerate_repos(repos)
+        return True, (orgs, repo_wrappers)
 
     def enumerate_user(self, user: str):
         """Enumerate a user's repositories."""
