@@ -97,3 +97,18 @@ class Job():
             elif isinstance(runs_on, str):
                 return runs_on.startswith('self-hosted')
         return False
+
+    def self_hosted(self):
+        """Analyze if any jobs within the workflow utilize self-hosted runners.
+
+        Returns:
+           list: List of jobs within the workflow that utilize self-hosted
+           runners.
+        """
+        sh_jobs = []
+
+        for job in self.jobs:
+            if job.isSelfHosted():
+                sh_jobs.append((job.job_name, job.job_data))
+
+        return sh_jobs
