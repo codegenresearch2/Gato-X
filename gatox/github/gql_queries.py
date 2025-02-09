@@ -11,7 +11,6 @@ class GqlQueries():
         isPrivate
         isArchived
         viewerPermission
-        forkingAllowed
         url
         isFork
         pushedAt
@@ -40,84 +39,28 @@ class GqlQueries():
     query RepoFiles($node_ids: [ID!]!) {
         nodes(ids: $node_ids) {
             ... on Repository {
-                nameWithOwner
-                isPrivate
-                isArchived
-                forkingAllowed
-                stargazers {
-                    totalCount
-                }
-                viewerPermission
-                pushedAt
-                url
-                isFork
-                defaultBranchRef {
-                    name
-                }
-                object(expression: "HEAD:.github/workflows/") {
-                    ... on Tree {
-                        entries {
-                            name
-                            type
-                            mode
-                            object {
-                                ... on Blob {
-                                    byteSize
-                                    text
-                                }
-                            }
-                        }
-                    }
-                }
+                ...repoWorkflows
             }
         }
     }
     """
 
     GET_YMLS_ENV = """
-        query RepoFiles($node_ids: [ID!]!) {
-            nodes(ids: $node_ids) {
-                ... on Repository {
-                    nameWithOwner
-                    isPrivate
-                    isArchived
-                    forkingAllowed
-                    stargazers {
-                        totalCount
-                    }
-                    viewerPermission
-                    pushedAt
-                    url
-                    isFork
-                    environments(first: 100) {
-                        edges {
+    query RepoFiles($node_ids: [ID!]!) {
+        nodes(ids: $node_ids) {
+            ... on Repository {
+                ...repoWorkflows
+                environments(first: 100) {
+                    edges {
                         node {
                             id
                             name
                         }
                     }
-                    }
-                    defaultBranchRef {
-                        name
-                    }
-                    object(expression: "HEAD:.github/workflows/") {
-                        ... on Tree {
-                            entries {
-                                name
-                                type
-                                mode
-                                object {
-                                    ... on Blob {
-                                        byteSize
-                                        text
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
+    }
     """
 
     @staticmethod
@@ -182,7 +125,7 @@ class GqlQueries():
             query = {
                 # We list envs if we have write access to one in the set (for secrets
                 # reasons, otherwise we don't list them)
-                "query": GqlQueries.GET_YMLS_ENV if repos[i].can_push() else GqlQueries.GET_YMLS,
+                "query": GqlQueries.GET_YMLS_ENV if any(repo.can_push() for repo in repos[0+100*i:top_len]) else GqlQueries.GET_YMLS,
                 "variables": {
                     "node_ids": [
                         repo.repo_data['node_id'] for repo in repos[0+100*i:top_len]
