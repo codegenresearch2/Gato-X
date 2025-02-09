@@ -95,8 +95,7 @@ a user's entire access, individual organizations, or repositories."""
 
         Output.info(
             f'The user { self.user_perms["user"] } belongs to {len(orgs)} ',
-            f'organizations!'
-        )
+            f'organizations!')
 
         for org in orgs:
             Output.tabbed(f"{Output.bright(org)}")
@@ -118,8 +117,7 @@ a user's entire access, individual organizations, or repositories."""
 
         Output.info(
             f'The user { self.user_perms["user"] } belongs to {len(orgs)} ',
-            f'organizations!'
-        )
+            f'organizations!')
 
         for org in orgs:
             Output.tabbed(f"{Output.bright(org)}")
@@ -130,7 +128,7 @@ a user's entire access, individual organizations, or repositories."""
 
     def enumerate_organization(self, org: str):
         """Enumerate an entire organization, and check everything relevant to
-        self-hosted runner abuse that that the user has permissions to check."
+        self-hosted runner abuse that the user has permissions to check."
 
         Args:
             org (str): Organization to perform enumeration on.
@@ -281,7 +279,7 @@ a user's entire access, individual organizations, or repositories."""
 
         Output.info(
             f"Querying and caching workflow YAML files "
-            f'from {len(repo_names)} repositories!'
+            f'from {len(repo_names)} repositories!"
         )
         queries = GqlQueries.get_workflow_ymls_from_list(repo_names)
 
