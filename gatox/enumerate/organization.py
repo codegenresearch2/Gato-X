@@ -1,6 +1,4 @@
 from typing import List
-from multiprocessing import Process
-
 from gatox.models.organization import Organization
 from gatox.models.repository import Repository
 from gatox.models.secret import Secret
