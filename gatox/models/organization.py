@@ -83,10 +83,10 @@ class Organization():
         Args:
             repo (Repository): The repository to set.
         """
-        if repo.is_public():
-            self.public_repos.append(repo)
-        else:
+        if repo.is_private():
             self.private_repos.append(repo)
+        else:
+            self.public_repos.append(repo)
 
     def toJSON(self):
         """Converts the organization to a Gato JSON representation.
