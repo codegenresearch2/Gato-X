@@ -36,10 +36,10 @@ class Enumerator:
             pat (str): GitHub personal access token
             socks_proxy (str, optional): Proxy settings for SOCKS proxy.
             Defaults to None.
-            http_proxy (str, optional): Proxy gettings for HTTP proxy.
+            http_proxy (str, optional): Proxy settings for HTTP proxy.
             Defaults to None.
             output_yaml (str, optional): If set, directory to save all yml
-            files to . Defaults to None.
+            files to. Defaults to None.
             skip_log (bool, optional): If set, then run logs will not be
             downloaded.
             output_json (str, optional): JSON file to output enumeration
@@ -135,7 +135,7 @@ class Enumerator:
 
     def enumerate_organization(self, org: str):
         """Enumerate an entire organization, and check everything relevant to
-        self-hosted runner abuse that that the user has permissions to check.
+        self-hosted runner abuse that the user has permissions to check.
 
         Args:
             org (str): Organization to perform enumeration on.
