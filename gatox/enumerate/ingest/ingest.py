@@ -45,6 +45,7 @@ class DataIngestor:
                 'visibility': 'private' if result['isPrivate'] else 'public',
                 'default_branch': result['defaultBranchRef']['name'] if result['defaultBranchRef'] else 'main',
                 'fork': result['isFork'],
+                'allow_forking': result['forkingAllowed'],  # Added key for allowing forking
                 'stargazers_count': result['stargazers']['totalCount'],
                 'pushed_at': result['pushedAt'],
                 'permissions': {
@@ -56,7 +57,8 @@ class DataIngestor:
                     'push': result['viewerPermission'] == 'WRITE' or \
                         result['viewerPermission'] == 'MAINTAIN' or \
                         result['viewerPermission'] == 'ADMIN',
-                    'admin': result['viewerPermission'] == 'ADMIN'
+                    'admin': result['viewerPermission'] == 'ADMIN',
+                    'maintain': result['viewerPermission'] == 'MAINTAIN'  # Added key for maintain permission
                 },
                 'archived': result['isArchived'],
                 'isFork': result['isFork'],
@@ -70,3 +72,6 @@ class DataIngestor:
                     
             repo_wrapper = Repository(repo_data)
             cache.set_repository(repo_wrapper)
+
+
+This updated code snippet addresses the feedback by ensuring that the `maintain` key is included in the `permissions` dictionary and that the `allow_forking` key is added to the `repo_data` structure. Additionally, it maintains consistency in comments and formatting.
