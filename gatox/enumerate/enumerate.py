@@ -15,7 +15,6 @@ from gatox.caching.cache_manager import CacheManager
 
 logger = logging.getLogger(__name__)
 
-
 class Enumerator:
     """Class holding all high level logic for enumerating GitHub, whether it is
     a user's entire access, individual organizations, or repositories.
@@ -46,6 +45,14 @@ class Enumerator:
             output_json (str, optional): JSON file to output enumeration
             results.
         """
+        assert isinstance(pat, str), "pat must be a string"
+        assert socks_proxy is None or isinstance(socks_proxy, str), "socks_proxy must be a string or None"
+        assert http_proxy is None or isinstance(http_proxy, str), "http_proxy must be a string or None"
+        assert output_yaml is None or isinstance(output_yaml, str), "output_yaml must be a string or None"
+        assert isinstance(skip_log, bool), "skip_log must be a boolean"
+        assert github_url is None or isinstance(github_url, str), "github_url must be a string or None"
+        assert output_json is None or isinstance(output_json, str), "output_json must be a string or None"
+
         self.api = Api(
             pat,
             socks_proxy=socks_proxy,
@@ -69,21 +76,19 @@ class Enumerator:
         if not self.user_perms and self.api.is_app_token():
             installation_info = self.api.get_installation_repos()
 
-            if installation_info:
-                count = installation_info["total_count"]
-                if count > 0:
-                    Output.info(
-                        f"Gato-X is using valid a GitHub App installation token!"
-                    )
-                    self.user_perms = {
-                        "user": "Github App",
-                        "scopes": [],
-                        "name": "GATO-X App Mode",
-                    }
+            if installation_info and installation_info["total_count"] > 0:
+                Output.info(
+                    f"Gato-X is using valid a GitHub App installation token!"
+                )
+                self.user_perms = {
+                    "user": "Github App",
+                    "scopes": [],
+                    "name": "GATO-X App Mode",
+                }
 
-                    return True
-                else:
-                    return False
+                return True
+            else:
+                return False
 
         if not self.user_perms:
             self.user_perms = self.api.check_user()
@@ -95,7 +100,7 @@ class Enumerator:
                 "The authenticated user is: "
                 f"{Output.bright(self.user_perms['user'])}"
             )
-            if len(self.user_perms["scopes"]):
+            if self.user_perms["scopes"]:
                 Output.info(
                     "The GitHub Classic PAT has the following scopes: "
                     f'{Output.yellow(", ".join(self.user_perms["scopes"]))}'
@@ -110,6 +115,8 @@ class Enumerator:
 
         Since this is an IO heavy operation, we use a threadpool with 3 workers.
         """
+        assert isinstance(queries, list), "queries must be a list"
+
         with ThreadPoolExecutor(max_workers=3) as executor:
             Output.info(f"Querying repositories in {len(queries)} batches!")
             futures = []
@@ -153,7 +160,6 @@ class Enumerator:
 
         Returns:
             bool: False if the PAT is not valid for enumeration.
-            (list, list): Tuple containing list of orgs and list of repos.
         """
 
         self.__setup_user_info()
@@ -186,6 +192,8 @@ class Enumerator:
     def enumerate_user(self, user: str):
         """Enumerate a user's repositories."""
 
+        assert isinstance(user, str), "user must be a string"
+
         if not self.__setup_user_info():
             return False
 
@@ -214,6 +222,8 @@ class Enumerator:
         Returns:
             bool: False if a failure occurred enumerating the organization.
         """
+
+        assert isinstance(org, str), "org must be a string"
 
         if not self.__setup_user_info():
             return False
@@ -288,6 +298,10 @@ class Enumerator:
             large_enum (bool, optional): Whether to only download
             run logs when workflow analysis detects runners. Defaults to False.
         """
+
+        assert isinstance(repo_name, str), "repo_name must be a string"
+        assert isinstance(large_enum, bool), "large_enum must be a boolean"
+
         if not self.__setup_user_info():
             return False
 
@@ -331,13 +345,15 @@ class Enumerator:
         Args:
             repo_names (list): Repository name in {Org/Owner}/Repo format.
         """
-        repo_wrappers = []
-        if not self.__setup_user_info():
-            return repo_wrappers
 
-        if len(repo_names) == 0:
+        assert isinstance(repo_names, list), "repo_names must be a list"
+
+        if not self.__setup_user_info():
+            return False
+
+        if not repo_names:
             Output.error("The list of repositories was empty!")
-            return repo_wrappers
+            return
 
         Output.info(
             f"Querying and caching workflow YAML files "
@@ -346,6 +362,7 @@ class Enumerator:
         queries = GqlQueries.get_workflow_ymls_from_list(repo_names)
         self.__query_graphql_workflows(queries)
 
+        repo_wrappers = []
         try:
             for repo in repo_names:
                 repo_obj = self.enumerate_repo_only(repo, len(repo_names) > 100)
