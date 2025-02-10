@@ -18,7 +18,7 @@ class Repository():
             GitHub
         """
         self.repo_data = repo_data
-        # Ensure 'environments' key is present
+        # Temporary hack until full transition to GQL
         if 'environments' not in self.repo_data:
             self.repo_data['environments'] = []
 
@@ -54,7 +54,7 @@ class Repository():
 
     def is_private(self) -> bool:
         """Check if the repository is private."""
-        return self.repo_data['visibility'] != 'public'
+        return self.repo_data['private']
     
     def is_archived(self) -> bool:
         """Check if the repository is archived."""
