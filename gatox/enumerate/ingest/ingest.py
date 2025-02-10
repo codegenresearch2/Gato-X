@@ -58,11 +58,11 @@ class DataIngestor:
                         result['viewerPermission'] == 'ADMIN',
                     'admin': result['viewerPermission'] == 'ADMIN',
                     'maintain': result['viewerPermission'] == 'MAINTAIN' or \
-                        result['viewerPermission'] == 'ADMIN'  # Added key
+                        result['viewerPermission'] == 'ADMIN'
                 },
                 'archived': result['isArchived'],
                 'isFork': result['isFork'],
-                'forkingAllowed': result['forkingAllowed'],  # Updated key name
+                'allow_forking': result['allowForking'],  # Updated key name
                 'environments': []
             }
 
