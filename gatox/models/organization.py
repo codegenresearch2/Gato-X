@@ -46,10 +46,10 @@ class Organization():
             self.org_member = False
 
     def set_secrets(self, secrets: List[Secret]):
-        """Set repo-level secrets.
+        """Set organization-level secrets.
 
         Args:
-            secrets (List[Secret]): List of secrets at the repository level.
+            secrets (List[Secret]): List of secrets at the organization level.
         """
         self.secrets = secrets
 
@@ -105,5 +105,8 @@ class Organization():
             "public_repos": [repository.toJSON() for repository in self.public_repos],
             "private_repos": [repository.toJSON() for repository in self.private_repos]
         }
+
+        if self.limited_data:
+            representation = {"name": self.name}
 
         return representation
