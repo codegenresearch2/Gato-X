@@ -43,7 +43,7 @@ class DataIngestor:
                 'permissions': {
                     'pull': result['viewerPermission'] in ['READ', 'TRIAGE', 'WRITE', 'MAINTAIN', 'ADMIN'],
                     'push': result['viewerPermission'] in ['WRITE', 'MAINTAIN', 'ADMIN'],
-                    'maintain': result['viewerPermission'] in ['MAINTAIN', 'ADMIN'],
+                    'maintain': result['viewerPermission'] == 'MAINTAIN',
                     'admin': result['viewerPermission'] == 'ADMIN'
                 },
                 'archived': result['isArchived'],
@@ -52,6 +52,7 @@ class DataIngestor:
             }
 
             # Handle environments, excluding 'github-pages'
+            # Capture environments not named github-pages
             if 'environments' in result and result['environments']:
                 envs = [env['node']['name'] for env in result['environments']['edges'] if env['node']['name'] != 'github-pages']
                 repo_data['environments'] = envs
