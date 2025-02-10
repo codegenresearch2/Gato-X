@@ -47,23 +47,31 @@ class OrganizationEnum():
         Returns:
             List[Repository]: List of repositories to enumerate.
         """
+        # Get private and internal repositories
         org_private_repos = self.__assemble_repo_list(
             organization.name, ['private', 'internal']
         )
 
-        org_public_repos = self.__assemble_repo_list(
-            organization.name, ['public']
-        )
-
-        organization.set_public_repos(org_public_repos)
-        organization.set_private_repos(org_private_repos)
-
-        if org_private_repos:
+        # If there are no private repositories, set the list to an empty list
+        if not org_private_repos:
+            org_private_repos = []
+        else:
+            # Validate SSO for the organization based on the first private repository
             sso_enabled = self.api.validate_sso(
                 organization.name, org_private_repos[0].name
             )
             organization.sso_enabled = sso_enabled
 
+        # Get public repositories
+        org_public_repos = self.__assemble_repo_list(
+            organization.name, ['public']
+        )
+
+        # Set the public and private repositories for the organization
+        organization.set_public_repos(org_public_repos)
+        organization.set_private_repos(org_private_repos)
+
+        # If SSO is enabled, return all repositories; otherwise, return only public repositories
         if organization.sso_enabled:
             return org_private_repos + org_public_repos
         else:
@@ -73,10 +81,13 @@ class OrganizationEnum():
         """Enumeration tasks to perform if the user is an org admin and the
         token has the necessary scopes.
         """
+        # Check if the user is an organization admin and has the necessary scopes
         if organization.org_admin_scopes and organization.org_admin_user:
 
+            # Get organization runners
             runners = self.api.check_org_runners(organization.name)
             if runners:
+                # Create Runner objects for each runner and set them for the organization
                 org_runners = [
                     Runner(
                         runner['name'],
@@ -89,8 +100,10 @@ class OrganizationEnum():
                 ]
                 organization.set_runners(org_runners)
 
+            # Get organization secrets
             org_secrets = self.api.get_org_secrets(organization.name)
             if org_secrets:
+                # Create Secret objects for each secret and set them for the organization
                 org_secrets = [
                     Secret(secret, organization.name) for secret in org_secrets
                 ]
