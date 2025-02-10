@@ -1,6 +1,7 @@
 from typing import List
-from gatox.models.organization import Organization
+from gatox.models.runner import Runner
 from gatox.models.repository import Repository
+from gatox.models.secret import Secret
 
 class Organization():
     """Wrapper object for an organization."""
@@ -77,34 +78,32 @@ class Organization():
         """
         self.runners = runners
 
-    def set_repository(self, repository: Repository):
+    def set_repository(self, repo: Repository):
         """Add a single repository to the organization.
 
         Args:
-            repository (Repository): The repository to add.
+            repo (Repository): The repository to add.
         """
-        self.private_repos.append(repository)
-        self.public_repos.append(repository)
+        if repo.is_private():
+            self.private_repos.append(repo)
+        else:
+            self.public_repos.append(repo)
 
     def toJSON(self):
         """Converts the organization to a Gato JSON representation.
+
+        Returns:
+            dict: JSON representation of the organization.
         """
-        if self.limited_data:
-            representation = {
-                "name": self.name
-            }
-        else:
-            representation = {
-                "name": self.name,
-                "org_admin_user": self.org_admin_user,
-                "org_member": self.org_member,
-                "org_runners": [runner.toJSON() for runner in self.runners],
-                "org_secrets": [secret.toJSON() for secret in self.secrets],
-                "sso_access": self.sso_enabled,
-                "public_repos":
-                    [repository.toJSON() for repository in self.public_repos],
-                "private_repos":
-                    [repository.toJSON() for repository in self.private_repos]
-            }
+        representation = {
+            "name": self.name,
+            "org_admin_user": self.org_admin_user,
+            "org_member": self.org_member,
+            "org_runners": [runner.toJSON() for runner in self.runners],
+            "org_secrets": [secret.toJSON() for secret in self.secrets],
+            "sso_access": self.sso_enabled,
+            "public_repos": [repository.toJSON() for repository in self.public_repos],
+            "private_repos": [repository.toJSON() for repository in self.private_repos]
+        }
 
         return representation
