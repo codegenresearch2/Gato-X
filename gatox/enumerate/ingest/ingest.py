@@ -36,7 +36,7 @@ class DataIngestor:
                 'full_name': result['nameWithOwner'],
                 'html_url': result['url'],
                 'visibility': 'private' if result['isPrivate'] else 'public',
-                'default_branch': result['defaultBranchRef']['name'] if result['defaultBranchRef'] else 'main',
+                'default_branch': result['defaultBranchRef']['name'] if 'defaultBranchRef' in result else 'main',
                 'fork': result['isFork'],
                 'stargazers_count': result['stargazers']['totalCount'],
                 'pushed_at': result['pushedAt'],
@@ -49,7 +49,7 @@ class DataIngestor:
                 'archived': result['isArchived'],
                 'isFork': result['isFork'],
                 'environments': [],
-                'forking_allowed': result['allowForking']
+                'forking_allowed': result.get('allowForking', False)
             }
 
             # If 'environments' is present, capture environment names excluding 'github-pages'
