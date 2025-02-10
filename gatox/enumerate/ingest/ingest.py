@@ -8,7 +8,8 @@ class DataIngestor:
         """
         Creates a cache of workflow yml files retrieved from graphQL. This method saves off all yml files,
         so during org level enumeration if we perform yml enumeration the cached file is used instead of
-        making GitHub REST requests.
+        making GitHub REST requests. If any malformed or missing data is encountered, the method falls back
+        to the contents API for these specific cases.
 
         Args:
             yml_results (list): List of results from individual GraphQL queries (100 nodes at a time).
@@ -46,7 +47,8 @@ class DataIngestor:
                     'admin': result['viewerPermission'] == 'ADMIN'
                 },
                 'archived': result['isArchived'],
-                'isFork': result['isFork'],
+                'is_fork': result['isFork'],
+                'allow_forking': result['allowForking'],
                 'environments': []
             }
 
