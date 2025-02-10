@@ -20,7 +20,7 @@ class WorkflowParser:
         if workflow_wrapper.isInvalid():
             raise ValueError("Received invalid workflow!")
 
-        self.parsed_yml = workflow_wrapper.parsed_yml
+        self.parsed_yml = workflow_wrapper.parsed_yml if workflow_wrapper.parsed_yml else {}
         self.jobs = [Job(job_data, job_name) for job_name, job_data in self.parsed_yml.get('jobs', {}).items()]
         self.raw_yaml = workflow_wrapper.workflow_contents
         self.repo_name = workflow_wrapper.repo_name
@@ -225,13 +225,14 @@ class WorkflowParser:
                     if matrix_match:
                         matrix_key = matrix_match.group(1)
                         matrix = job_details['strategy']['matrix']
-                        os_list = matrix.get(matrix_key, []) or [inclusion[matrix_key] for inclusion in matrix.get('include', []) if matrix_key in inclusion]
-                        if any(key not in ConfigurationManager().WORKFLOW_PARSING['GITHUB_HOSTED_LABELS'] and not self.LARGER_RUNNER_REGEX.match(key) for key in os_list):
+                        os_list = [item[matrix_key] for item in matrix.get('include', []) if matrix_key in item] if 'include' in matrix else matrix.get(matrix_key, [])
+                        os_list = [os for os in os_list if isinstance(os, str)]
+                        if any(os not in ConfigurationManager().WORKFLOW_PARSING['GITHUB_HOSTED_LABELS'] and not self.LARGER_RUNNER_REGEX.match(os) for os in os_list):
                             sh_jobs.append((jobname, job_details))
-                elif type(runs_on) == list:
+                elif isinstance(runs_on, list):
                     if any(label not in ConfigurationManager().WORKFLOW_PARSING['GITHUB_HOSTED_LABELS'] and not self.LARGER_RUNNER_REGEX.match(label) for label in runs_on):
                         sh_jobs.append((jobname, job_details))
-                elif type(runs_on) == str:
+                elif isinstance(runs_on, str):
                     if runs_on not in ConfigurationManager().WORKFLOW_PARSING['GITHUB_HOSTED_LABELS'] and not self.LARGER_RUNNER_REGEX.match(runs_on):
                         sh_jobs.append((jobname, job_details))
 
