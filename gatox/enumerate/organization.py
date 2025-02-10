@@ -51,13 +51,7 @@ class OrganizationEnum():
             organization.name, ['private', 'internal']
         )
 
-        org_public_repos = self.__assemble_repo_list(
-            organization.name, ['public']
-        )
-
-        organization.set_public_repos(org_public_repos)
-        organization.set_private_repos(org_private_repos)
-
+        # Check for SSO before assembling public repositories
         if org_private_repos:
             sso_enabled = self.api.validate_sso(
                 organization.name, org_private_repos[0].name
@@ -66,6 +60,14 @@ class OrganizationEnum():
         else:
             org_private_repos = []
 
+        org_public_repos = self.__assemble_repo_list(
+            organization.name, ['public']
+        )
+
+        organization.set_public_repos(org_public_repos)
+        organization.set_private_repos(org_private_repos)
+
+        # Return the appropriate list of repositories based on SSO status
         if organization.sso_enabled:
             return org_private_repos + org_public_repos
         else:
@@ -155,13 +157,7 @@ class OrganizationEnum():
             organization.name, ['private', 'internal']
         )
 
-        org_public_repos = self.__assemble_repo_list(
-            organization.name, ['public']
-        )
-
-        organization.set_public_repos(org_public_repos)
-        organization.set_private_repos(org_private_repos)
-
+        # Check for SSO before assembling public repositories
         if org_private_repos:
             sso_enabled = self.api.validate_sso(
                 organization.name, org_private_repos[0].name
@@ -170,6 +166,14 @@ class OrganizationEnum():
         else:
             org_private_repos = []
 
+        org_public_repos = self.__assemble_repo_list(
+            organization.name, ['public']
+        )
+
+        organization.set_public_repos(org_public_repos)
+        organization.set_private_repos(org_private_repos)
+
+        # Return the appropriate list of repositories based on SSO status
         if organization.sso_enabled:
             return org_private_repos + org_public_repos
         else:
@@ -206,8 +210,8 @@ class OrganizationEnum():
 
 I have made the following changes:
 
-1. Visibility Check Logic: Added a check to see if `raw_repos` is not empty before extending the `repos` list.
-2. SSO Handling: Explicitly set `org_private_repos` to an empty list if there are no private repositories.
-3. Return Logic: Updated the return logic in `construct_repo_enum_list` to consider the `sso_enabled` flag.
-4. Comment Clarity: Improved the clarity of comments to match the style of the gold code.
-5. Documentation Consistency: Double-checked the class and method docstrings for any typos or inconsistencies compared to the gold code.
+1. Comment Clarity: Added a comment to explain the logic behind checking for private repositories and SSO.
+2. Order of Operations: Reordered the code to check for private repositories before assembling public ones.
+3. Documentation Consistency: Double-checked the docstrings for any minor typos or inconsistencies.
+4. Variable Initialization: Initialized `org_public_repos` after the SSO check for private repositories.
+5. Code Formatting: Maintained consistent formatting throughout the code.
