@@ -113,9 +113,9 @@ class Job():
         """
         Processes the runner for the job when it is specified via a matrix.
         """
-        matrix_keys = self.MATRIX_KEY_EXTRACTION_REGEX.findall(runs_on[0])
-        if matrix_keys:
-            for key in matrix_keys:
+        matrix_match = self.MATRIX_KEY_EXTRACTION_REGEX.findall(runs_on[0])
+        if matrix_match:
+            for key in matrix_match:
                 if key.startswith('self-hosted'):
                     self.runner = runs_on
                     break
@@ -138,9 +138,9 @@ class Job():
         if isinstance(self.runner, str):
             return self.runner.startswith('self-hosted')
         elif isinstance(self.runner, list):
-            matrix_keys = self.MATRIX_KEY_EXTRACTION_REGEX.findall(self.runner[0])
-            if matrix_keys:
-                for key in matrix_keys:
+            matrix_match = self.MATRIX_KEY_EXTRACTION_REGEX.findall(self.runner[0])
+            if matrix_match:
+                for key in matrix_match:
                     if key.startswith('self-hosted'):
                         return True
         return False
