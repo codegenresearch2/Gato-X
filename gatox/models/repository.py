@@ -18,9 +18,9 @@ class Repository():
             GitHub
         """
         self.repo_data = repo_data
-        # Temporary hack until full transition to GQL
-        if 'environments' not in self.repo_data:
-            self.repo_data['environments'] = []
+        # Ensure 'public' key is present
+        if 'public' not in self.repo_data:
+            self.repo_data['public'] = True  # Default to public if not specified
 
         self.name = self.repo_data['full_name']
         self.org_name = self.name.split('/')[0]
