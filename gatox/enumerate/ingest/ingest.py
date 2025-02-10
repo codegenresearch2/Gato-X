@@ -19,27 +19,26 @@ class DataIngestor:
         """
         cache = CacheManager()
         for result in yml_results:
-            if not result or 'nameWithOwner' not in result:
+            # Skip malformed data and ensure the 'object' key exists
+            if not result or 'nameWithOwner' not in result or not result.get('object'):
                 continue
 
             owner = result['nameWithOwner']
             cache.set_empty(owner)
 
-            # Skip malformed data and ensure the 'object' key exists
-            if result.get('object'):
-                for yml_node in result['object']['entries']:
-                    yml_name = yml_node['name']
-                    if yml_name.lower().endswith(('yml', 'yaml')):
-                        contents = yml_node['object']['text']
-                        wf_wrapper = Workflow(owner, contents, yml_name)
-                        cache.set_workflow(owner, yml_name, wf_wrapper)
+            for yml_node in result['object']['entries']:
+                yml_name = yml_node['name']
+                if yml_name.lower().endswith(('yml', 'yaml')):
+                    contents = yml_node['object']['text']
+                    wf_wrapper = Workflow(owner, contents, yml_name)
+                    cache.set_workflow(owner, yml_name, wf_wrapper)
 
             repo_data = {
                 'full_name': result['nameWithOwner'],
                 'html_url': result['url'],
                 'visibility': 'private' if result['isPrivate'] else 'public',
                 'default_branch': result['defaultBranchRef']['name'] if result['defaultBranchRef'] else 'main',
-                'is_fork': result['isFork'],
+                'fork': result['isFork'],
                 'stargazers_count': result['stargazers']['totalCount'],
                 'pushed_at': result['pushedAt'],
                 'permissions': {
@@ -48,7 +47,7 @@ class DataIngestor:
                     'admin': result['viewerPermission'] == 'ADMIN'
                 },
                 'archived': result['isArchived'],
-                'allow_forking': result['allowForking'],
+                'allow_forking': result['forkingAllowed'],
                 'environments': []
             }
 
