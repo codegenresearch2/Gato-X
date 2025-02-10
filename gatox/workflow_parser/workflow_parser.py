@@ -11,10 +11,27 @@ from gatox.models.workflow import Workflow
 logger = logging.getLogger(__name__)
 
 class WorkflowParser():
+    """
+    Parser for YML files. This class is structured to take a yaml file as input and expose methods
+    that answer questions about the yaml file. This will allow for growing what kind of analytics
+    this tool can perform as the project grows in capability. This class should only perform static
+    analysis. The caller is responsible for performing any API queries to augment the analysis.
+    """
+
     LARGER_RUNNER_REGEX_LIST = re.compile(r'(windows|ubuntu)-(22.04|20.04|2019-2022)-(4|8|16|32|64)core-(16|32|64|128|256)gb')
     MATRIX_KEY_EXTRACTION_REGEX = re.compile(r'{{\s*matrix\.([\w-]+)\s*}}')
 
     def __init__(self, workflow_wrapper: Workflow, non_default=None):
+        """
+        Initialize class with workflow file.
+
+        Args:
+            workflow_wrapper (Workflow): Workflow object containing yaml file read in from repository.
+            non_default (str, optional): Non-default branch name. Defaults to None.
+
+        Raises:
+            ValueError: If the received workflow is invalid.
+        """
         if workflow_wrapper.isInvalid():
             raise ValueError("Received invalid workflow!")
 
@@ -30,18 +47,48 @@ class WorkflowParser():
         self.composites = self.extract_referenced_actions()
 
     def is_referenced(self):
+        """
+        Check if the workflow is referenced externally.
+
+        Returns:
+            bool: True if the workflow is referenced externally, False otherwise.
+        """
         return self.external_ref
 
     def has_trigger(self, trigger):
+        """
+        Check if the workflow has a specific trigger.
+
+        Args:
+            trigger (str): The trigger to check for.
+
+        Returns:
+            bool: True if the workflow has the specified trigger, False otherwise.
+        """
         return trigger in self.get_vulnerable_triggers()
 
     def output(self, dirpath: str):
+        """
+        Write this yaml file out to the provided directory.
+
+        Args:
+            dirpath (str): Directory to save the yaml file to.
+
+        Returns:
+            bool: True if the file was successfully written, False otherwise.
+        """
         Path(os.path.join(dirpath, f'{self.repo_name}')).mkdir(parents=True, exist_ok=True)
         with open(os.path.join(dirpath, f'{self.repo_name}/{self.wf_name}'), 'w') as wf_out:
             wf_out.write(self.raw_yaml)
         return True
 
     def extract_referenced_actions(self):
+        """
+        Extracts composite actions from the workflow file.
+
+        Returns:
+            dict: Dictionary containing referenced actions.
+        """
         referenced_actions = {}
         vulnerable_triggers = self.get_vulnerable_triggers()
         if not vulnerable_triggers or 'jobs' not in self.parsed_yml:
@@ -57,6 +104,15 @@ class WorkflowParser():
         return referenced_actions
 
     def get_vulnerable_triggers(self, alternate=False):
+        """
+        Analyze if the workflow is set to execute on potentially risky triggers.
+
+        Args:
+            alternate (str, optional): Alternate trigger to check for. Defaults to False.
+
+        Returns:
+            list: List of triggers within the workflow that could be vulnerable to GitHub Actions script injection vulnerabilities.
+        """
         vulnerable_triggers = []
         risky_triggers = ['pull_request_target', 'workflow_run', 'issue_comment', 'issues']
         if alternate:
@@ -79,6 +135,15 @@ class WorkflowParser():
         return vulnerable_triggers
 
     def backtrack_gate(self, needs_name):
+        """
+        Attempts to find if a job needed by a specific job has a gate check.
+
+        Args:
+            needs_name (str or list): The name of the job or a list of job names.
+
+        Returns:
+            bool: True if a job needed by the specified job has a gate check, False otherwise.
+        """
         if type(needs_name) == list:
             return any(self.backtrack_gate(need) for need in needs_name)
         else:
@@ -88,6 +153,12 @@ class WorkflowParser():
         return False
 
     def analyze_checkouts(self):
+        """
+        Analyze if any steps within the workflow utilize the 'actions/checkout' action with a 'ref' parameter.
+
+        Returns:
+            dict: Dictionary containing information about checkout steps in each job.
+        """
         job_checkouts = {}
         if 'jobs' not in self.parsed_yml:
             return job_checkouts
@@ -134,6 +205,15 @@ class WorkflowParser():
         return job_checkouts
 
     def check_pwn_request(self, bypass=False):
+        """
+        Check for potential pwn request vulnerabilities.
+
+        Args:
+            bypass (bool, optional): Bypass vulnerability check. Defaults to False.
+
+        Returns:
+            dict: Dictionary containing information about potential pwn request vulnerabilities.
+        """
         vulnerable_triggers = self.get_vulnerable_triggers()
         if not vulnerable_triggers and not bypass:
             return {}
@@ -159,6 +239,15 @@ class WorkflowParser():
         return checkout_risk
 
     def check_rules(self, gate_rules):
+        """
+        Checks environment protection rules from the API against those specified in the job.
+
+        Args:
+            gate_rules (list): List of rules to check against.
+
+        Returns:
+            bool: True if the job is violating any of the rules, False otherwise.
+        """
         for rule in gate_rules:
             for job in self.jobs:
                 for deploy_rule in job.deployments:
@@ -167,6 +256,15 @@ class WorkflowParser():
         return True
 
     def check_injection(self, bypass=False):
+        """
+        Check for potential script injection vulnerabilities.
+
+        Args:
+            bypass (bool, optional): Bypass vulnerability check. Defaults to False.
+
+        Returns:
+            dict: Dictionary containing information about potential script injection vulnerabilities.
+        """
         vulnerable_triggers = self.get_vulnerable_triggers()
         if not vulnerable_triggers and not bypass:
             return {}
@@ -217,6 +315,12 @@ class WorkflowParser():
         return injection_risk
 
     def self_hosted(self):
+        """
+        Analyze if any jobs within the workflow utilize self-hosted runners.
+
+        Returns:
+            list: List of jobs within the workflow that utilize self-hosted runners.
+        """
         sh_jobs = []
 
         if not self.parsed_yml or 'jobs' not in self.parsed_yml or not self.parsed_yml['jobs']:
