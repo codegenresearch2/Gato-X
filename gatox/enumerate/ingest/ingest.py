@@ -20,15 +20,11 @@ class DataIngestor:
         cache = CacheManager()
         for result in yml_results:
             # Skip malformed data and ensure the 'object' key exists
-            if not result or 'nameWithOwner' not in result:
+            if not result or 'nameWithOwner' not in result or not result.get('object'):
                 continue
 
             owner = result['nameWithOwner']
             cache.set_empty(owner)
-
-            # Skip if 'object' is not present or empty
-            if not result.get('object'):
-                continue
 
             for yml_node in result['object']['entries']:
                 yml_name = yml_node['name']
@@ -42,7 +38,7 @@ class DataIngestor:
                 'html_url': result['url'],
                 'visibility': 'private' if result['isPrivate'] else 'public',
                 'default_branch': result['defaultBranchRef']['name'] if result['defaultBranchRef'] else 'main',
-                'fork': result['isFork'],
+                'is_fork': result['isFork'],
                 'stargazers_count': result['stargazers']['totalCount'],
                 'pushed_at': result['pushedAt'],
                 'permissions': {
@@ -55,7 +51,7 @@ class DataIngestor:
                 'environments': []
             }
 
-            if 'environments' in result and result['environments']:
+            if 'environments' in result and result['environizations']:
                 # Capture environments not named github-pages
                 envs = [env['node']['name'] for env in result['environments']['edges'] if env['node']['name'] != 'github-pages']
                 repo_data['environments'] = envs
