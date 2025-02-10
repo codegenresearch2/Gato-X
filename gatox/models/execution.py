@@ -9,8 +9,8 @@ class Execution:
     def __init__(self):
         """Initialize wrapper class."""
         self.user_details = None
-        self.organizations = []
-        self.repositories = []
+        self.organizations: list[Organization] = []
+        self.repositories: list[Repository] = []
         self.timestamp = datetime.datetime.now()
 
     def add_organizations(self, organizations: list[Organization]):
