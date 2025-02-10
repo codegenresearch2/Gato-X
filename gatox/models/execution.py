@@ -5,22 +5,20 @@ from gatox.models.organization import Repository
 
 
 class Execution:
-    """Simple wrapper class to provide accessor methods against a full Gato
-    execution run.
-    """
+    """Simple wrapper class to provide accessor methods against a full Gato execution run."""
 
     def __init__(self):
         """Initialize wrapper class."""
-        self.user_details = None
+        self.user_details: dict | None = None
         self.organizations: list[Organization] = []
         self.repositories: list[Repository] = []
-        self.timestamp = datetime.datetime.now()
+        self.timestamp: datetime.datetime = datetime.datetime.now()
 
     def add_organizations(self, organizations: list[Organization]):
         """Add list of organization wrapper objects.
 
         Args:
-            organizations (List[Organization]): List of org wrappers.
+            organizations (list[Organization]): List of organization wrapper objects.
         """
         if organizations:
             self.organizations = organizations
@@ -29,12 +27,12 @@ class Execution:
         """Add list of repository wrapper objects.
 
         Args:
-            repositories (List[Repository]): List of repo wrappers.
+            repositories (list[Repository]): List of repository wrapper objects.
         """
         if repositories:
             self.repositories = repositories
 
-    def set_user_details(self, user_details):
+    def set_user_details(self, user_details: dict):
         """Set user details.
 
         Args:
@@ -42,28 +40,22 @@ class Execution:
         """
         self.user_details = user_details
 
-    def toJSON(self):
-        """Converts the run to Gato JSON representation"""
+    def toJSON(self) -> dict:
+        """Converts the run to Gato JSON representation."""
         if self.user_details:
-            representation = {
+            return {
                 "username": self.user_details["user"],
                 "scopes": self.user_details["scopes"],
                 "enumeration": {
                     "timestamp": self.timestamp.ctime(),
-                    "organizations": [
-                        organization.toJSON() for organization in self.organizations
-                    ],
-                    "repositories": [
-                        repository.toJSON() for repository in self.repositories
-                    ],
+                    "organizations": [org.toJSON() for org in self.organizations],
+                    "repositories": [repo.toJSON() for repo in self.repositories],
                 },
             }
-
-            return representation
         else:
             return {}
 
-    def enumerate_repositories(self, api, user_details):
+    def enumerate_repositories(self, api, user_details: dict):
         """Enumerate repositories for the user.
 
         Args:
@@ -74,16 +66,8 @@ class Execution:
         orgs = api.get_user_organizations(user_details["user"])
         repos = api.get_user_repositories(user_details["user"])
 
-        org_wrappers = []
-        repo_wrappers = []
-
-        for org in orgs:
-            org_wrapper = Organization(org, user_details["scopes"])
-            org_wrappers.append(org_wrapper)
-
-        for repo in repos:
-            repo_wrapper = Repository(repo, user_details["scopes"])
-            repo_wrappers.append(repo_wrapper)
+        org_wrappers = [Organization(org, user_details["scopes"]) for org in orgs]
+        repo_wrappers = [Repository(repo, user_details["scopes"]) for repo in repos]
 
         self.add_organizations(org_wrappers)
         self.add_repositories(repo_wrappers)
