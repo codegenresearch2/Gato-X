@@ -7,12 +7,15 @@ from gatox.models.repository import Repository
 from gatox.enumerate.enumerate import Enumerator
 from gatox.cli.output import Output
 
-# Constants
+# Initialize output
+Output(True)
+
+# Global variables
 TEST_REPO_DATA = None
 TEST_WORKFLOW_YML = None
 TEST_ORG_DATA = None
 
-# Fixtures
+# Fixture to load test files
 @pytest.fixture(scope="session", autouse=True)
 def load_test_files(request):
     global TEST_REPO_DATA, TEST_WORKFLOW_YML, TEST_ORG_DATA
@@ -33,7 +36,6 @@ def load_test_files(request):
 @patch("gatox.enumerate.enumerate.Api")
 def test_bad_token(mock_api, capsys):
     """Test the behavior when an invalid token is used."""
-    Output(True)
     gh_enumeration_runner = Enumerator(
         "ghp_BADTOKEN",
         socks_proxy=None,
