@@ -32,7 +32,7 @@ class OrganizationEnum():
         for visibility in visibilities:
             raw_repos = self.api.check_org_repos(organization, visibility)
             if raw_repos:
-                repos.extend([Repository(repo, allow_forking=True, include_risky_triggers=True) for repo in raw_repos])
+                repos.extend([Repository(repo) for repo in raw_repos])
 
         return repos
 
@@ -51,16 +51,6 @@ class OrganizationEnum():
             organization.name, ['private', 'internal']
         )
 
-        # We might legitimately have no private repos despite being a
-        # member.
-        if org_private_repos:
-            sso_enabled = self.api.validate_sso(
-                organization.name, org_private_repos[0].name
-            )
-            organization.sso_enabled = sso_enabled
-        else:
-            org_private_repos = []
-
         org_public_repos = self.__assemble_repo_list(
             organization.name, ['public']
         )
@@ -68,10 +58,7 @@ class OrganizationEnum():
         organization.set_public_repos(org_public_repos)
         organization.set_private_repos(org_private_repos)
 
-        if organization.sso_enabled:
-            return org_private_repos + org_public_repos
-        else:
-            return org_public_repos
+        return org_private_repos + org_public_repos
 
     def admin_enum(self, organization: Organization):
         """Enumeration tasks to perform if the user is an org admin and the
@@ -100,8 +87,3 @@ class OrganizationEnum():
                 ]
 
                 organization.set_secrets(org_secrets)
-
-
-In the rewritten code, I have added `allow_forking=True` and `include_risky_triggers=True` to the `Repository` constructor in the `__assemble_repo_list` method to include forking allowance and more risky triggers in repository data. I have also added consistent formatting for GraphQL query structure.
-
-Additionally, I have added clearer logic for determining repository privacy by checking if the repository is private or internal in the `construct_repo_enum_list` method. I have also added consistent function documentation.
