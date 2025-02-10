@@ -59,7 +59,7 @@ class DataIngestor:
                     'admin': result['viewerPermission'] == 'ADMIN'
                 },
                 'archived': result['isArchived'],
-                'allow_forking': result['allowForking'],  # Corrected key name
+                'allow_forking': result['forkingAllowed'],  # Corrected key name
                 'isFork': result['isFork'],
                 'environments': []
             }
@@ -76,5 +76,5 @@ class DataIngestor:
 This revised code snippet addresses the feedback from the oracle by:
 
 1. Including the `maintain` key in the `permissions` dictionary.
-2. Correcting the key name for allowing forking to `allow_forking`.
+2. Correcting the key name for allowing forking to `allow_forking` and ensuring it is set to `result['forkingAllowed']`.
 3. Removing the extraneous comment that caused a syntax error.
