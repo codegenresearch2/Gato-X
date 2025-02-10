@@ -14,7 +14,7 @@ class Repository():
         """Initialize wrapper class.
 
         Args:
-            repo_json (dict): Dictionary from parsing JSON object returned from
+            repo_data (dict): Dictionary from parsing JSON object returned from
             GitHub
         """
         self.repo_data = repo_data
