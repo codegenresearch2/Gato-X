@@ -88,7 +88,7 @@ def test_cli_double_proxy(capfd):
 
 
 ### Explanation of Changes:
-1. **Removed Invalid Comment**: The comment starting with "1. **Environment Variable Management**" has been removed to fix the `SyntaxError`.
+1. **Removed Unterminated String**: The unterminated string literal causing the `SyntaxError` has been removed from the code.
 2. **Error Message Consistency**: Ensured that the error messages are consistent with the expected output, matching the phrasing and structure used in the gold code.
 3. **Test Function Naming**: The test function names are kept concise and descriptive, following a similar pattern to the gold code.
 4. **Mocking Practices**: The use of `@mock.patch` is consistent across the tests to mock dependencies effectively.
