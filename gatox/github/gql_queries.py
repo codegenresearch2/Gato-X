@@ -2,7 +2,7 @@ class GqlQueries():
     """Constructs graphql queries for use with the GitHub GraphQL api.
     """
 
-    GET_YMLS_WITH_SLUGS = """
+    REPO_WORKFLOWS_FRAGMENT = """
     fragment repoWorkflows on Repository {
         nameWithOwner
         stargazers {
@@ -11,7 +11,6 @@ class GqlQueries():
         isPrivate
         isArchived
         viewerPermission
-        forkingAllowed
         url
         isFork
         pushedAt
@@ -33,40 +32,32 @@ class GqlQueries():
                 }
             }
         }
+        permissions {
+            pull
+            push
+            maintain
+            admin
+        }
     }
     """
 
     GET_YMLS = """
     query RepoFiles($node_ids: [ID!]!) {
         nodes(ids: $node_ids) {
-            ... on Repository {
-                nameWithOwner
-                isPrivate
-                isArchived
-                forkingAllowed
-                stargazers {
-                    totalCount
-                }
-                viewerPermission
-                pushedAt
-                url
-                isFork
-                defaultBranchRef {
-                    name
-                }
-                object(expression: "HEAD:.github/workflows/") {
-                    ... on Tree {
-                        entries {
-                            name
-                            type
-                            mode
-                            object {
-                                ... on Blob {
-                                    byteSize
-                                    text
-                                }
-                            }
-                        }
+            ...repoWorkflows
+        }
+    }
+    """
+
+    GET_YMLS_ENV = """
+    query RepoFiles($node_ids: [ID!]!) {
+        nodes(ids: $node_ids) {
+            ...repoWorkflows
+            environments(first: 100) {
+                edges {
+                    node {
+                        id
+                        name
                     }
                 }
             }
@@ -74,73 +65,27 @@ class GqlQueries():
     }
     """
 
-    GET_YMLS_ENV = """
-        query RepoFiles($node_ids: [ID!]!) {
-            nodes(ids: $node_ids) {
-                ... on Repository {
-                    nameWithOwner
-                    isPrivate
-                    isArchived
-                    forkingAllowed
-                    stargazers {
-                        totalCount
-                    }
-                    viewerPermission
-                    pushedAt
-                    url
-                    isFork
-                    environments(first: 100) {
-                        edges {
-                        node {
-                            id
-                            name
-                        }
-                    }
-                    }
-                    defaultBranchRef {
-                        name
-                    }
-                    object(expression: "HEAD:.github/workflows/") {
-                        ... on Tree {
-                            entries {
-                                name
-                                type
-                                mode
-                                object {
-                                    ... on Blob {
-                                        byteSize
-                                        text
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    """
-
     @staticmethod
     def get_workflow_ymls_from_list(repos: list):
         """
-        Constructs a list of GraphQL queries to fetch workflow YAML 
+        Constructs a list of GraphQL queries to fetch workflow YAML
         files from a list of repositories.
 
-        This method splits the list of repositories into chunks of 
-        up to 100 repositories each, and constructs a separate
-        GraphQL query for each chunk. Each query fetches the workflow 
+        This method splits the list of repositories into chunks of
+        up to 50 repositories each, and constructs a separate
+        GraphQL query for each chunk. Each query fetches the workflow
         YAML files from the repositories in one chunk.
 
         Args:
-            repos (list): A list of repository slugs, where each 
+            repos (list): A list of repository slugs, where each
             slug is a string in the format "owner/name".
 
         Returns:
-            list: A list of dictionaries, where each dictionary 
+            list: A list of dictionaries, where each dictionary
             contains a single GraphQL query in the format:
             {"query": "<GraphQL query string>"}.
         """
-        
+
         queries = []
 
         for i in range(0, len(repos), 50):
@@ -157,8 +102,8 @@ class GqlQueries():
                 repo_queries.append(repo_query)
 
             queries.append(
-                {"query": GqlQueries.GET_YMLS_WITH_SLUGS + "{\n" + "\n".join(repo_queries) + "\n}"}
-                )
+                {"query": GqlQueries.REPO_WORKFLOWS_FRAGMENT + "{\n" + "\n".join(repo_queries) + "\n}"}
+            )
 
         return queries
 
@@ -177,12 +122,9 @@ class GqlQueries():
             return queries
 
         for i in range(0, (len(repos) // 100) + 1):
-
             top_len = len(repos) if len(repos) < (100 + i*100) else (100 + i*100)
             query = {
-                # We list envs if we have write access to one in the set (for secrets
-                # reasons, otherwise we don't list them)
-                "query": GqlQueries.GET_YMLS_ENV if repos[i].can_push() else GqlQueries.GET_YMLS,
+                "query": GqlQueries.GET_YMLS_ENV if any(repo.permissions['push'] for repo in repos[0+100*i:top_len]) else GqlQueries.GET_YMLS,
                 "variables": {
                     "node_ids": [
                         repo.repo_data['node_id'] for repo in repos[0+100*i:top_len]
@@ -192,3 +134,10 @@ class GqlQueries():
 
             queries.append(query)
         return queries
+
+
+In the rewritten code, I have enhanced repository management functionality by adding a `permissions` field to the `repoWorkflows` fragment. This field includes `pull`, `push`, `maintain`, and `admin` permissions for each repository.
+
+I have improved permission handling for repositories by modifying the `get_workflow_ymls` method to check for `push` permissions when determining whether to include environment information in the GraphQL query.
+
+I have streamlined organization repository classification logic by moving the repository permission check to the `get_workflow_ymls` method and using the `any` function to check if any repository in the chunk has `push` permissions. This allows for more efficient querying of environment information.
