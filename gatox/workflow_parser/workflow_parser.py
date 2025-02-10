@@ -78,4 +78,40 @@ class WorkflowParser:
 
         return referenced_actions
 
+    def get_vulnerable_triggers(self, alternate=False):
+        """
+        Analyze if the workflow is set to execute on potentially risky triggers.
+
+        Args:
+            alternate (str, optional): Alternate trigger to check for. Defaults to False.
+
+        Returns:
+            list: List of triggers within the workflow that could be vulnerable to GitHub Actions script injection vulnerabilities.
+        """
+        vulnerable_triggers = []
+        risky_triggers = ['pull_request_target', 'workflow_run', 'issue_comment', 'issues', 'discussion_comment', 'discussion', 'fork', 'watch']
+        if alternate:
+            risky_triggers = [alternate]
+
+        if not self.parsed_yml or 'on' not in self.parsed_yml:
+            return vulnerable_triggers
+
+        triggers = self.parsed_yml['on']
+        if isinstance(triggers, list):
+            for trigger in triggers:
+                if trigger in risky_triggers:
+                    vulnerable_triggers.append(trigger)
+        elif isinstance(triggers, dict):
+            for trigger, trigger_conditions in triggers.items():
+                if trigger in risky_triggers:
+                    if trigger_conditions and 'types' in trigger_conditions:
+                        if 'labeled' in trigger_conditions['types'] and len(trigger_conditions['types']) == 1:
+                            vulnerable_triggers.append(f"{trigger}:{trigger_conditions['types'][0]}")
+                        else:
+                            vulnerable_triggers.append(trigger)
+                    else:
+                        vulnerable_triggers.append(trigger)
+
+        return vulnerable_triggers
+
     # Rest of the code remains the same
