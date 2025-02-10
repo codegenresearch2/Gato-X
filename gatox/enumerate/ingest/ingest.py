@@ -16,16 +16,14 @@ class DataIngestor:
         cache = CacheManager()
         for result in yml_results:
             # Skip if result is missing or does not contain 'nameWithOwner'
-            if not result:
-                continue
-            if 'nameWithOwner' not in result:
+            if not result or 'nameWithOwner' not in result:
                 continue
 
             owner = result['nameWithOwner']
             cache.set_empty(owner)
 
             # If 'object' is present, iterate through its entries and cache workflow objects
-            if 'object' in result:
+            if 'object' in result and result['object']:
                 for yml_node in result['object']['entries']:
                     yml_name = yml_node['name']
                     if yml_name.lower().endswith(('yml', 'yaml')):
@@ -51,7 +49,7 @@ class DataIngestor:
                 'archived': result['isArchived'],
                 'isFork': result['isFork'],
                 'environments': [],
-                'forkingAllowed': result['allowForking']
+                'forking_allowed': result['allowForking']
             }
 
             # If 'environments' is present, capture environment names excluding 'github-pages'
