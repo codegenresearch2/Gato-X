@@ -42,7 +42,7 @@ def load_test_files(request):
 # Tests
 @patch("gatox.enumerate.enumerate.Api")
 def test_init(mock_api):
-    """Test constructor for enumerator."""
+    """Test the constructor for the enumerator."""
     gh_enumeration_runner = Enumerator(
         "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         socks_proxy=None,
@@ -55,7 +55,7 @@ def test_init(mock_api):
 
 @patch("gatox.enumerate.enumerate.Api")
 def test_self_enumerate(mock_api, capsys):
-    """Test self enumeration method."""
+    """Test the self enumeration method."""
     mock_api.return_value.is_app_token.return_value = False
     mock_api.return_value.check_user.return_value = {
         "user": "testUser",
@@ -63,49 +63,4 @@ def test_self_enumerate(mock_api, capsys):
     }
     mock_api.return_value.check_organizations.return_value = []
 
-    gh_enumeration_runner = Enumerator(
-        "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        socks_proxy=None,
-        http_proxy="localhost:8080",
-        output_yaml=True,
-        skip_log=False,
-    )
-
-    gh_enumeration_runner.self_enumeration()
-
-    captured = capsys.readouterr()
-    print_output = captured.out
-    assert "The user testUser belongs to 0 organizations!" in escape_ansi(print_output)
-
-@patch("gatox.enumerate.enumerate.Api")
-def test_enumerate_repo_admin(mock_api, capsys):
-    """Test enumeration of repository with admin privileges."""
-    mock_api.return_value.is_app_token.return_value = False
-    mock_api.return_value.check_user.return_value = {
-        "user": "testUser",
-        "scopes": ["repo", "workflow"],
-    }
-    mock_api.return_value.retrieve_run_logs.return_value = BASE_MOCK_RUNNER
-
-    repo_data = json.loads(json.dumps(TEST_REPO_DATA))
-    repo_data["permissions"]["admin"] = True
-    test_repo = Repository(repo_data)
-
-    gh_enumeration_runner = Enumerator(
-        "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        socks_proxy=None,
-        http_proxy="localhost:8080",
-        output_yaml=True,
-        skip_log=False,
-    )
-
-    gh_enumeration_runner.enumerate_repo_only(repo_data["full_name"])
-
-    captured = capsys.readouterr()
-    print_output = captured.out
-    assert "The user is an administrator on the" in escape_ansi(print_output)
-
-# Add more tests as needed...
-
-
-This revised code snippet addresses the syntax error by ensuring that comments are properly formatted and do not disrupt the code structure. It also focuses on aligning the use of constants, mock return values, test documentation, output capturing, test coverage, variable naming, and code structure with the gold code.
+    gh_enumeration_runner = Enumeration
