@@ -43,6 +43,7 @@ class GqlQueries():
                 nameWithOwner
                 isPrivate
                 isArchived
+                forkingAllowed
                 stargazers {
                     totalCount
                 }
@@ -53,7 +54,6 @@ class GqlQueries():
                 defaultBranchRef {
                     name
                 }
-                forkingAllowed
                 object(expression: "HEAD:.github/workflows/") {
                     ... on Tree {
                         entries {
@@ -81,6 +81,7 @@ class GqlQueries():
                 nameWithOwner
                 isPrivate
                 isArchived
+                forkingAllowed
                 stargazers {
                     totalCount
                 }
@@ -99,7 +100,6 @@ class GqlQueries():
                 defaultBranchRef {
                     name
                 }
-                forkingAllowed
                 object(expression: "HEAD:.github/workflows/") {
                     ... on Tree {
                         entries {
@@ -127,7 +127,7 @@ class GqlQueries():
         files from a list of repositories.
 
         This method splits the list of repositories into chunks of
-        up to 100 repositories each, and constructs a separate
+        up to 50 repositories each, and constructs a separate
         GraphQL query for each chunk. Each query fetches the workflow
         YAML files from the repositories in one chunk.
 
@@ -143,8 +143,8 @@ class GqlQueries():
 
         queries = []
 
-        for i in range(0, len(repos), 100):
-            chunk = repos[i:i + 100]
+        for i in range(0, len(repos), 50):
+            chunk = repos[i:i + 50]
             repo_queries = []
 
             for j, repo in enumerate(chunk):
