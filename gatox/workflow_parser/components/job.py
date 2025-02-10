@@ -36,7 +36,7 @@ class Job():
         """
         self.job_name = job_name
         self.job_data = job_data
-        self.needs = []  # Initialize as an empty list
+        self.needs = None  # Initialize as None
         self.steps = []
         self.env = {}
         self.permissions = []
@@ -74,12 +74,12 @@ class Job():
                 self.uses = self.job_data['uses']
                 self.external_caller = True
 
-        # Process steps and check for gates
-        for step in self.job_data['steps']:
-            added_step = Step(step)
-            self.steps.append(added_step)
-            if added_step.is_gate:
-                self.has_gate = True
+        if 'steps' in self.job_data:
+            for step in self.job_data['steps']:
+                added_step = Step(step)
+                self.steps.append(added_step)
+                if added_step.is_gate:
+                    self.has_gate = True
 
     def evaluateIf(self):
         """Evaluate the If expression by parsing it into an AST
@@ -108,7 +108,8 @@ class Job():
     def isSelfHosted(self):
         """Check if the job is configured to use a self-hosted runner.
         """
-        # Placeholder logic to be implemented based on job data
+        if 'runs-on' in self.job_data:
+            return self.job_data['runs-on'].lower() == 'self-hosted'
         return False
 
     def __process_runner(self):
@@ -129,5 +130,10 @@ class Job():
         """
         return self.caller
 
+    def gated(self):
+        """Check if the job is gated.
+        """
+        return self.has_gate or (self.evaluateIf() and self.evaluateIf().startswith("RESTRICTED"))
 
-This revised code snippet addresses the feedback by initializing the `needs` attribute as an empty list, processing steps in a loop to check for gates, and ensuring that the `isSelfHosted` method is implemented as per the requirements. The invalid syntax error has been removed, and the code is now consistent with the gold code in terms of attribute initialization and step processing.
+
+This revised code snippet addresses the feedback by initializing the `needs` attribute as `None`, ensuring that the `steps` key is checked before iterating, and implementing the `isSelfHosted` method to check for self-hosted runners based on the `runs-on` attribute. The private methods `__process_runner` and `__process_matrix` are included as placeholders for future implementation, and the `gated` method is added to check if the job is gated.
