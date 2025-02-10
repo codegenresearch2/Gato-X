@@ -147,14 +147,14 @@ class Enumerator:
         """Enumerates all organizations associated with the authenticated user.
 
         Returns:
-            bool: False if the PAT is not valid for enumeration.
+            tuple: A tuple containing two lists - one for organizations and one for repositories.
         """
         if not self.__setup_user_info():
-            return False
+            return False, []
 
         if "repo" not in self.user_perms["scopes"]:
             Output.error("Self-enumeration requires the repo scope!")
-            return False
+            return False, []
 
         Output.info("Enumerating user owned repositories!")
 
@@ -170,14 +170,16 @@ class Enumerator:
         for org in orgs:
             Output.tabbed(f"{Output.bright(org)}")
 
-        org_wrappers = list(map(self.enumerate_organization, orgs))
+        org_wrappers = [
+            self.enumerate_organization(org) for org in orgs
+        ]
 
-        return org_wrappers, repo_wrappers
+        return True, (org_wrappers, repo_wrappers)
 
     def enumerate_user(self, user: str):
         """Enumerate a user's repositories."""
         if not self.__setup_user_info():
-            return False
+            return False, []
 
         repos = self.api.get_user_repos(user)
 
@@ -186,13 +188,13 @@ class Enumerator:
                 f"Unable to query the user: {Output.bright(user)}! Ensure the "
                 "user exists!"
             )
-            return False
+            return False, []
 
         Output.result(f"Enumerating the {Output.bright(user)} user!")
 
         repo_wrappers = self.enumerate_repos(repos)
 
-        return repo_wrappers
+        return True, repo_wrappers
 
     def enumerate_organization(self, org: str):
         """Enumerate an entire organization, and check everything relevant to
@@ -202,10 +204,10 @@ class Enumerator:
             org (str): Organization to perform enumeration on.
 
         Returns:
-            bool: False if a failure occurred enumerating the organization.
+            Organization: An organization object with updated information.
         """
         if not self.__setup_user_info():
-            return False
+            return None
 
         details = self.api.get_organization_details(org)
 
@@ -214,7 +216,7 @@ class Enumerator:
                 f"Unable to query the org: {Output.bright(org)}! Ensure the "
                 "organization exists!"
             )
-            return False
+            return None
 
         organization = Organization(details, self.user_perms["scopes"])
 
@@ -282,7 +284,7 @@ class Enumerator:
             run logs when workflow analysis detects runners. Defaults to False.
         """
         if not self.__setup_user_info():
-            return False
+            return False, None
 
         repo = CacheManager().get_repository(repo_name)
 
@@ -296,7 +298,7 @@ class Enumerator:
                 Output.tabbed(
                     f"Skipping archived repository: {Output.bright(repo.name)}!"
                 )
-                return False
+                return False, None
 
             Output.tabbed(f"Enumerating: {Output.bright(repo.name)}!")
 
@@ -310,12 +312,13 @@ class Enumerator:
                 self.user_perms["scopes"], repo
             )
 
-            return repo
+            return True, repo
         else:
             Output.warn(
                 f"Unable to enumerate {Output.bright(repo_name)}! It may not "
                 "exist or the user does not have access."
             )
+            return False, None
 
     def enumerate_repos(self, repo_names: list):
         """Enumerate a list of repositories, each repo must be in Org/Repo name
@@ -325,11 +328,11 @@ class Enumerator:
             repo_names (list): Repository name in {Org/Owner}/Repo format.
         """
         if not self.__setup_user_info():
-            return False
+            return False, []
 
         if not repo_names:
             Output.error("The list of repositories was empty!")
-            return
+            return False, []
 
         Output.info(
             f"Querying and caching workflow YAML files "
@@ -341,10 +344,10 @@ class Enumerator:
         repo_wrappers = []
         try:
             for repo in repo_names:
-                repo_obj = self.enumerate_repo_only(repo, len(repo_names) > 100)
-                if repo_obj:
+                success, repo_obj = self.enumerate_repo_only(repo, len(repo_names) > 100)
+                if success and repo_obj:
                     repo_wrappers.append(repo_obj)
         except KeyboardInterrupt:
             Output.warn("Keyboard interrupt detected, exiting enumeration!")
 
-        return repo_wrappers
+        return True, repo_wrappers
