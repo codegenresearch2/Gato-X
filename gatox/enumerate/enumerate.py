@@ -146,11 +146,11 @@ class Enumerator:
     def self_enumeration(self):
         """Enumerates all organizations associated with the authenticated user."""
         if not self.__setup_user_info():
-            return False, []
+            return False
 
         if "repo" not in self.user_perms["scopes"]:
             Output.error("Self-enumeration requires the repo scope!")
-            return False, []
+            return False
 
         Output.info("Enumerating user owned repositories!")
 
@@ -170,9 +170,7 @@ class Enumerator:
         for org in orgs:
             Output.tabbed(f"{Output.bright(org)}")
 
-        org_wrappers = [
-            self.enumerate_organization(org) for org in orgs
-        ]
+        org_wrappers = list(map(self.enumerate_organization, orgs))
 
         return True, (org_wrappers, repo_wrappers)
 
