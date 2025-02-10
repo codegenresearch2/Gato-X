@@ -344,7 +344,7 @@ class WorkflowParser:
                     if matrix_match:
                         matrix_key = matrix_match.group(1)
                         matrix = job_details['strategy']['matrix'] if 'strategy' in job_details and 'matrix' in job_details['strategy'] else {}
-                        os_list = [item for sublist in matrix.get(matrix_key, []) if matrix_key in matrix else [inclusion[matrix_key] for inclusion in matrix.get('include', []) if matrix_key in inclusion] for item in sublist]
+                        os_list = [item for sublist in (matrix.get(matrix_key, []) if matrix_key in matrix else [inclusion[matrix_key] for inclusion in matrix.get('include', []) if matrix_key in inclusion]) for item in sublist]
                         if any(key not in github_hosted_labels and not self.LARGER_RUNNER_REGEX.match(key) for key in os_list):
                             sh_jobs.append((jobname, job_details))
                 elif isinstance(runs_on, list):
