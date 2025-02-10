@@ -20,11 +20,15 @@ class DataIngestor:
         cache = CacheManager()
         for result in yml_results:
             # Skip malformed data and ensure the 'object' key exists
-            if not result or 'nameWithOwner' not in result or not result.get('object'):
+            if not result or 'nameWithOwner' not in result:
                 continue
 
             owner = result['nameWithOwner']
             cache.set_empty(owner)
+
+            # Skip if 'object' is not present or empty
+            if not result.get('object'):
+                continue
 
             for yml_node in result['object']['entries']:
                 yml_name = yml_node['name']
