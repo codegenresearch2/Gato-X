@@ -336,5 +336,3 @@ class Enumerator:
             Output.warn("Keyboard interrupt detected, exiting enumeration!")
 
         return repo_wrappers
-
-I have removed the problematic comment from the code snippet. This comment was causing a syntax error and preventing the module from being imported correctly. By removing it, the code should be able to run without any syntax errors.
