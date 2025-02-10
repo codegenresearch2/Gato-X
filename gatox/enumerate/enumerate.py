@@ -144,14 +144,14 @@ class Enumerator:
         """Enumerates all organizations associated with the authenticated user.
 
         Returns:
-            tuple: A tuple containing a list of organization objects and a list of repository wrappers.
+            bool: True if successful, False otherwise.
         """
         if not self.__setup_user_info():
-            return False, []
+            return False
 
         if "repo" not in self.user_perms["scopes"]:
             Output.error("Self-enumeration requires the repo scope!")
-            return False, []
+            return False
 
         Output.info("Enumerating user owned repositories!")
 
@@ -167,7 +167,7 @@ class Enumerator:
         for org in orgs:
             Output.tabbed(f"{Output.bright(org)}")
 
-        return True, (orgs, repo_wrappers)
+        return True, orgs, repo_wrappers
 
     def enumerate_user(self, user: str):
         """Enumerate a user's repositories."""
