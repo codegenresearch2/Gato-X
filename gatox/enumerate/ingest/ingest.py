@@ -62,7 +62,7 @@ class DataIngestor:
                 },
                 'archived': result['isArchived'],
                 'isFork': result['isFork'],
-                'forkingAllowed': result['allowForking'],  # Key name consistency
+                'allow_forking': result['allowForking'],  # Key name consistency
                 'environments': []
             }
 
