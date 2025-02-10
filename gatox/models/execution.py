@@ -22,18 +22,20 @@ class Execution:
         Args:
             organizations (List[Organization]): List of org wrappers.
         """
-        self.organizations = organizations
+        if organizations:
+            self.organizations = organizations
 
     def add_repositories(self, repositories: list[Repository]):
-        """Add list of organization wrapper objects.
+        """Add list of repository wrapper objects.
 
         Args:
-            organizations (List[Organization]): List of org wrappers.
+            repositories (List[Repository]): List of repo wrappers.
         """
-        self.repositories = repositories
+        if repositories:
+            self.repositories = repositories
 
     def set_user_details(self, user_details):
-        """_summary_
+        """Set user details.
 
         Args:
             user_details (dict): Details about the user's permissions.
