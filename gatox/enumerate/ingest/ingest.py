@@ -27,7 +27,7 @@ class DataIngestor:
                 if result['object']:
                     for yml_node in result['object']['entries']:
                         yml_name = yml_node['name']
-                        if yml_name.lower().endswith(('yml', 'yaml')):
+                        if yml_name.lower().endswith(('.yml', '.yaml')):
                             contents = yml_node['object']['text']
                             wf_wrapper = Workflow(owner, contents, yml_name)
                             cache.set_workflow(owner, yml_name, wf_wrapper)
@@ -44,15 +44,17 @@ class DataIngestor:
                     'permissions': {
                         'pull': result['viewerPermission'] in ['READ', 'TRIAGE', 'WRITE', 'MAINTAIN', 'ADMIN'],
                         'push': result['viewerPermission'] in ['WRITE', 'MAINTAIN', 'ADMIN'],
+                        'maintain': result['viewerPermission'] in ['MAINTAIN', 'ADMIN'],
                         'admin': result['viewerPermission'] == 'ADMIN'
                     },
                     'archived': result['isArchived'],
-                    'is_fork': result['isFork'],
+                    'isFork': result['isFork'],
                     'environments': []
                 }
 
                 # Handle environments, excluding 'github-pages'
                 if 'environments' in result and result['environments']:
+                    # Capture environments not named github-pages
                     envs = [env['node']['name'] for env in result['environments']['edges'] if env['node']['name'] != 'github-pages']
                     repo_data['environments'] = envs
 
