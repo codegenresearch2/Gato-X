@@ -32,6 +32,7 @@ class GqlQueries:
                 }
             }
         }
+        forkingAllowed
     }
     """
 
