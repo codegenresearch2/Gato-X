@@ -58,6 +58,7 @@ class OrganizationEnum():
             )
             organization.sso_enabled = sso_enabled
         else:
+            # Adding a comment to clarify the possibility of no private repos
             org_private_repos = []  # Explicitly set to an empty list if no private repos
 
         # Improve organization and repository management
