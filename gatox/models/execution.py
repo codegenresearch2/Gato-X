@@ -22,15 +22,17 @@ class Execution:
         Args:
             organizations (List[Organization]): List of org wrappers.
         """
-        self.organizations = organizations
+        if organizations:  # Check if the list is not empty
+            self.organizations = organizations
 
     def add_repositories(self, repositories: list[Repository]):
-        """Add list of organization wrapper objects.
+        """Add list of repository wrapper objects.
 
         Args:
             repositories (List[Repository]): List of repo wrappers.
         """
-        self.repositories = repositories
+        if repositories:  # Check if the list is not empty
+            self.repositories = repositories
 
     def set_user_details(self, user_details):
         """Set user details.
@@ -47,7 +49,7 @@ class Execution:
                 "username": self.user_details["user"],
                 "scopes": self.user_details["scopes"],
                 "enumeration": {
-                    "timestamp": self.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+                    "timestamp": self.timestamp.ctime(),  # Use ctime() for human-readable format
                     "organizations": [
                         organization.toJSON() for organization in self.organizations
                     ],
