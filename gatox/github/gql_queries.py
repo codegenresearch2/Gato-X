@@ -2,7 +2,7 @@ class GqlQueries:
     """Constructs graphql queries for use with the GitHub GraphQL api.
     """
 
-    REPO_WORKFLOWS_FRAGMENT = """
+    GET_YMLS_WITH_SLUGS = """
     fragment repoWorkflows on Repository {
         nameWithOwner
         stargazers {
@@ -14,6 +14,7 @@ class GqlQueries:
         url
         isFork
         pushedAt
+        forkingAllowed
         defaultBranchRef {
             name
         }
@@ -38,7 +39,9 @@ class GqlQueries:
     GET_YMLS = """
     query RepoFiles($node_ids: [ID!]!) {
         nodes(ids: $node_ids) {
-            ...repoWorkflows
+            ... on Repository {
+                ...repoWorkflows
+            }
         }
     }
     """
@@ -46,12 +49,14 @@ class GqlQueries:
     GET_YMLS_ENV = """
     query RepoFiles($node_ids: [ID!]!) {
         nodes(ids: $node_ids) {
-            ...repoWorkflows
-            environments(first: 100) {
-                edges {
-                    node {
-                        id
-                        name
+            ... on Repository {
+                ...repoWorkflows
+                environments(first: 100) {
+                    edges {
+                        node {
+                            id
+                            name
+                        }
                     }
                 }
             }
@@ -63,10 +68,17 @@ class GqlQueries:
     def get_workflow_ymls_from_list(repos: list):
         """
         Constructs a list of GraphQL queries to fetch workflow YAML files from a list of repositories.
+
+        Args:
+            repos (list): A list of repository slugs, where each slug is a string in the format "owner/name".
+
+        Returns:
+            list: A list of dictionaries, where each dictionary contains a single GraphQL query in the format:
+                {"query": "<GraphQL query string>"}.
         """
         queries = []
-        for i in range(0, len(repos), 50):
-            chunk = repos[i:i + 50]
+        for i in range(0, len(repos), 100):
+            chunk = repos[i:i + 100]
             repo_queries = []
             for j, repo in enumerate(chunk):
                 owner, name = repo.split('/')
@@ -76,12 +88,18 @@ class GqlQueries:
                 }}
                 """
                 repo_queries.append(repo_query)
-            queries.append({"query": GqlQueries.REPO_WORKFLOWS_FRAGMENT + "{\n" + "\n".join(repo_queries) + "\n}"})
+            queries.append({"query": GqlQueries.GET_YMLS_WITH_SLUGS + "{\n" + "\n".join(repo_queries) + "\n}"})
         return queries
 
     @staticmethod
     def get_workflow_ymls(repos: list):
         """Retrieve workflow yml files for each repository.
+
+        Args:
+            repos (List[Repository]): List of repository objects
+
+        Returns:
+            (list): List of JSON post parameters for each graphQL query.
         """
         queries = []
         if not repos:
@@ -96,6 +114,3 @@ class GqlQueries:
             }
             queries.append(query)
         return queries
-
-
-In the rewritten code, I have organized the class and methods for better readability and clarity. I have also simplified the return statements for determining repository visibility and included more detailed permission checks. I have maintained consistent code structure and style while following the provided rules.
