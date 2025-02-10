@@ -77,6 +77,9 @@ class Enumerator:
                     "name": "GATO-X App Mode",
                 }
                 return True
+            else:
+                return False
+
         if not self.user_perms:
             self.user_perms = self.api.check_user()
             if not self.user_perms:
@@ -144,14 +147,14 @@ class Enumerator:
         """Enumerates all organizations associated with the authenticated user.
 
         Returns:
-            bool: False if the PAT is not valid for enumeration.
+            tuple: A tuple containing a list of organization wrappers and a list of repository wrappers.
         """
         if not self.__setup_user_info():
-            return False
+            return False, []
 
         if "repo" not in self.user_perms["scopes"]:
             Output.error("Self-enumeration requires the repo scope!")
-            return False
+            return False, []
 
         Output.info("Enumerating user owned repositories!")
 
@@ -169,7 +172,7 @@ class Enumerator:
 
         org_wrappers = list(map(self.enumerate_organization, orgs))
 
-        return org_wrappers, repo_wrappers
+        return True, (org_wrappers, repo_wrappers)
 
     def enumerate_user(self, user: str):
         """Enumerate a user's repositories."""
@@ -199,10 +202,10 @@ class Enumerator:
             org (str): Organization to perform enumeration on.
 
         Returns:
-            bool: False if a failure occurred enumerating the organization.
+            Organization: An organization wrapper object.
         """
         if not self.__setup_user_info():
-            return False
+            return None
 
         details = self.api.get_organization_details(org)
 
@@ -211,7 +214,7 @@ class Enumerator:
                 f"Unable to query the org: {Output.bright(org)}! Ensure the "
                 "organization exists!"
             )
-            return False
+            return None
 
         organization = Organization(details, self.user_perms["scopes"])
 
@@ -275,7 +278,7 @@ class Enumerator:
             run logs when workflow analysis detects runners. Defaults to False.
         """
         if not self.__setup_user_info():
-            return False
+            return None
 
         repo = CacheManager().get_repository(repo_name)
 
@@ -289,7 +292,7 @@ class Enumerator:
                 Output.tabbed(
                     f"Skipping archived repository: {Output.bright(repo.name)}!"
                 )
-                return False
+                return None
 
             Output.tabbed(f"Enumerating: {Output.bright(repo.name)}!")
 
@@ -309,6 +312,7 @@ class Enumerator:
                 f"Unable to enumerate {Output.bright(repo_name)}! It may not "
                 "exist or the user does not have access."
             )
+            return None
 
     def enumerate_repos(self, repo_names: list):
         """Enumerate a list of repositories, each repo must be in Org/Repo name
@@ -318,11 +322,11 @@ class Enumerator:
             repo_names (list): Repository name in {Org/Owner}/Repo format.
         """
         if not self.__setup_user_info():
-            return False
+            return []
 
         if not repo_names:
             Output.error("The list of repositories was empty!")
-            return
+            return []
 
         Output.info(
             f"Querying and caching workflow YAML files "
