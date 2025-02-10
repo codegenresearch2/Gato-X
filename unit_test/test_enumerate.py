@@ -15,6 +15,19 @@ TEST_REPO_DATA = None
 TEST_WORKFLOW_YML = None
 TEST_ORG_DATA = None
 
+# Mock data
+BASE_MOCK_RUNNER = [
+    {
+        "machine_name": "unittest1",
+        "runner_name": "much_unit_such_test",
+        "runner_type": "organization",
+        "non_ephemeral": False,
+        "token_permissions": {"Actions": "write"},
+        "runner_group": "Default",
+        "requested_labels": ["self-hosted", "Linux", "X64"],
+    }
+]
+
 # Fixture to load test files
 @pytest.fixture(scope="session", autouse=True)
 def load_test_files(request):
