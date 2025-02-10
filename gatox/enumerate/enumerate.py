@@ -129,9 +129,6 @@ class Enumerator:
             'organizations!'
         )
 
-        for org in orgs:
-            Output.tabbed(f"{Output.bright(org)}")
-
         org_wrappers = list(map(self.enumerate_organization, orgs))
 
         return org_wrappers
@@ -208,8 +205,6 @@ class Enumerator:
                 
                 self.repo_e.enumerate_repository(repo, large_org_enum=len(enum_list) > 25)
                 self.repo_e.enumerate_repository_secrets(repo)
-
-                organization.set_repository(repo)
 
                 Recommender.print_repo_secrets(
                     self.user_perms['scopes'],
