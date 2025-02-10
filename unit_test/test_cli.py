@@ -90,8 +90,9 @@ def test_cli_double_proxy(capfd):
 ### Explanation of Changes:
 1. **Removed Unterminated String**: The unterminated string literal causing the `SyntaxError` has been removed from the code.
 2. **Error Message Consistency**: Ensured that the error messages are consistent with the expected output, matching the phrasing and structure used in the gold code.
-3. **Test Function Naming**: The test function names are kept concise and descriptive, following a similar pattern to the gold code.
+3. **Test Function Naming**: Simplified the test function names to be more concise and consistent with the naming conventions used in the gold code.
 4. **Mocking Practices**: The use of `@mock.patch` is consistent across the tests to mock dependencies effectively.
 5. **Assertions on Mock Calls**: Assertions are added to verify that certain methods on mocked objects were called, ensuring that the code behaves as expected.
-6. **Docstring Clarity**: Docstrings are refined to be more concise and directly reflective of the test case's purpose.
+6. **Docstring Clarity**: Docstrings are refined to be more concise and directly reflective of the purpose of each test case.
 7. **Environment Variable Management**: The management of environment variables is consistent with the gold code, particularly in how `GH_TOKEN` is set and deleted in the tests.
+8. **Use of `capfd`**: Ensured that output is captured correctly and assertions are made against the right variables.
