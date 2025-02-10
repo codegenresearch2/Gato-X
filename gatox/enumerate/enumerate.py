@@ -64,6 +64,7 @@ class Enumerator:
         self.org_e = OrganizationEnum(self.api)
 
     def __setup_user_info(self):
+        """Set up user information and validate the token."""
         if not self.user_perms:
             self.user_perms = self.api.check_user()
             if not self.user_perms:
@@ -85,8 +86,7 @@ class Enumerator:
         return True
 
     def validate_only(self):
-        """Validates the PAT access and exits.
-        """
+        """Validate the PAT access and list organizations."""
         if not self.__setup_user_info():
             return False
 
@@ -107,15 +107,8 @@ class Enumerator:
         return [Organization({'login': org}, self.user_perms['scopes'], True) for org in orgs]
 
     def self_enumeration(self):
-        """Enumerates all organizations associated with the authenticated user.
-
-        Returns:
-            bool: False if the PAT is not valid for enumeration.
-        """
-
-        self.__setup_user_info()
-
-        if not self.user_perms:
+        """Enumerate all organizations associated with the authenticated user."""
+        if not self.__setup_user_info():
             return False
 
         if 'repo' not in self.user_perms['scopes']:
@@ -134,16 +127,7 @@ class Enumerator:
         return org_wrappers
 
     def enumerate_organization(self, org: str):
-        """Enumerate an entire organization, and check everything relevant to
-        self-hosted runner abuse that the user has permissions to check.
-
-        Args:
-            org (str): Organization to perform enumeration on.
-
-        Returns:
-            bool: False if a failure occurred enumerating the organization.
-        """
-
+        """Enumerate an entire organization and check for self-hosted runner abuse."""
         if not self.__setup_user_info():
             return False
 
@@ -181,7 +165,6 @@ class Enumerator:
         for i, wf_query in enumerate(wf_queries):
             Output.info(f"Querying {i} out of {len(wf_queries)} batches!", end='\r')
             result = self.org_e.api.call_post('/graphql', wf_query)
-            # Sometimes we don't get a 200, fall back in this case.
             if result.status_code == 200:
                 DataIngestor.construct_workflow_cache(result.json()['data']['nodes'])
             else:
@@ -312,7 +295,6 @@ class Enumerator:
         repo_wrappers = []
         try:
             for repo in repo_names:
-
                 repo_obj = self.enumerate_repo_only(repo, len(repo_names) > 100)
                 if repo_obj:
                     repo_wrappers.append(repo_obj)
