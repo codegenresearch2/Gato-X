@@ -58,7 +58,16 @@ class OrganizationEnum():
         organization.set_public_repos(org_public_repos)
         organization.set_private_repos(org_private_repos)
 
-        return org_private_repos + org_public_repos
+        if org_private_repos:
+            sso_enabled = self.api.validate_sso(
+                organization.name, org_private_repos[0].name
+            )
+            organization.sso_enabled = sso_enabled
+
+        if organization.sso_enabled:
+            return org_private_repos + org_public_repos
+        else:
+            return org_public_repos
 
     def admin_enum(self, organization: Organization):
         """Enumeration tasks to perform if the user is an org admin and the
