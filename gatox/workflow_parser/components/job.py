@@ -1,21 +1,5 @@
-"""
-Copyright 2024, Adnan Khan
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
 import re
-
-from gatox.workflow_parser.components.step import Step
+from gatox.configuration.configuration_manager import ConfigurationManager
 from gatox.workflow_parser.expression_parser import ExpressionParser
 from gatox.workflow_parser.expression_evaluator import ExpressionEvaluator
 
@@ -112,6 +96,13 @@ class Job():
         """Check if the workflow is gated.
         """
         return self.has_gate or (self.evaluateIf() and self.evaluateIf().startswith("RESTRICTED"))
+
+    def isSelfHosted(self):
+        """Determine if the job is configured to use self-hosted runners.
+        """
+        if 'runs-on' in self.job_data:
+            return self.job_data['runs-on'].startswith('self-hosted')
+        return False
 
     def __process_runner(self):
         """
