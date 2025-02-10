@@ -1,4 +1,5 @@
 import datetime
+from typing import List
 from gatox.models.runner import Runner
 from gatox.models.secret import Secret
 
@@ -22,15 +23,15 @@ class Repository():
 
         self.name = self.repo_data['full_name']
         self.org_name = self.name.split('/')[0]
-        self.secrets: list[Secret] = []
-        self.org_secrets: list[Secret] = []
+        self.secrets: List[Secret] = []
+        self.org_secrets: List[Secret] = []
         self.sh_workflow_names = []
         self.enum_time = datetime.datetime.now()
 
         self.permission_data = self.repo_data['permissions']
         self.sh_runner_access = False
-        self.accessible_runners: list[Runner] = []
-        self.runners: list[Runner] = []
+        self.accessible_runners: List[Runner] = []
+        self.runners: List[Runner] = []
         self.pwn_req_risk = []
         self.injection_risk = []
 
@@ -47,7 +48,7 @@ class Repository():
         return self.permission_data.get('pull', False)
 
     def is_private(self):
-        return self.repo_data['private']
+        return not self.repo_data['public']
     
     def is_archived(self):
         return self.repo_data['archived']
@@ -72,7 +73,7 @@ class Repository():
         """
         self.enum_time = datetime.datetime.now()
 
-    def set_accessible_org_secrets(self, secrets: list[Secret]):
+    def set_accessible_org_secrets(self, secrets: List[Secret]):
         """Sets organization secrets that can be read using a workflow in
         this repository.
 
@@ -104,7 +105,7 @@ class Repository():
         """
         return len(self.injection_risk) > 0
 
-    def set_secrets(self, secrets: list[Secret]):
+    def set_secrets(self, secrets: List[Secret]):
         """Sets secrets that are attached to this repository.
 
         Args:
@@ -112,7 +113,7 @@ class Repository():
         """
         self.secrets = secrets
 
-    def set_runners(self, runners: list[Runner]):
+    def set_runners(self, runners: List[Runner]):
         """Sets list of self-hosted runners attached at the repository level.
         """
         self.sh_runner_access = True
