@@ -91,21 +91,18 @@ class Organization():
     def toJSON(self):
         """Converts the repository to a Gato JSON representation.
         """
-        if self.limited_data:
-            representation = {
-                "name": self.name
-            }
-        else:
-            representation = {
-                "name": self.name,
-                "org_admin_user": self.org_admin_user,
-                "org_admin_scopes": self.org_admin_scopes,
-                "org_member": self.org_member,
-                "org_runners": [runner.toJSON() for runner in self.runners],
-                "org_secrets": [secret.toJSON() for secret in self.secrets],
-                "sso_access": self.sso_enabled,
-                "public_repos": [repository.toJSON() for repository in self.public_repos],
-                "private_repos": [repository.toJSON() for repository in self.private_repos]
-            }
+        representation = {
+            "name": self.name,
+            "org_admin_user": self.org_admin_user,
+            "org_admin_scopes": self.org_admin_scopes,
+            "org_member": self.org_member,
+            "org_runners": [runner.toJSON() for runner in self.runners],
+            "org_secrets": [secret.toJSON() for secret in self.secrets],
+            "sso_access": self.sso_enabled,
+        }
+
+        if not self.limited_data:
+            representation["public_repos"] = [repository.toJSON() for repository in self.public_repos]
+            representation["private_repos"] = [repository.toJSON() for repository in self.private_repos]
 
         return representation
