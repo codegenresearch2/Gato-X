@@ -3,7 +3,6 @@ import datetime
 from gatox.models.runner import Runner
 from gatox.models.secret import Secret
 
-
 class Repository():
     """Simple wrapper class to provide accessor methods against the repository
     JSON response from GitHub.
@@ -23,15 +22,15 @@ class Repository():
 
         self.name = self.repo_data['full_name']
         self.org_name = self.name.split('/')[0]
-        self.secrets: list[Secret] = []
-        self.org_secrets: list[Secret] = []
+        self.secrets = []
+        self.org_secrets = []
         self.sh_workflow_names = []
         self.enum_time = datetime.datetime.now()
 
         self.permission_data = self.repo_data['permissions']
         self.sh_runner_access = False
-        self.accessible_runners: list[Runner] = []
-        self.runners: list[Runner] = []
+        self.accessible_runners = []
+        self.runners = []
         self.pwn_req_risk = []
         self.injection_risk = []
 
@@ -48,8 +47,8 @@ class Repository():
         return self.permission_data.get('pull', False)
 
     def is_private(self):
-        return self.repo_data['visibility'] != 'public'
-    
+        return self.repo_data['private']
+
     def is_archived(self):
         return self.repo_data['archived']
 
@@ -58,7 +57,7 @@ class Repository():
 
     def is_public(self):
         return self.repo_data['visibility'] == 'public'
-    
+
     def is_fork(self):
         return self.repo_data['fork']
 
@@ -81,6 +80,7 @@ class Repository():
             secrets (List[Secret]): List of Secret wrapper objects.
         """
         self.org_secrets = secrets
+        self.permission_data['read_org_secrets'] = True
 
     def set_pwn_request(self, pwn_request_package: dict):
         self.pwn_req_risk.append(pwn_request_package)
@@ -112,12 +112,14 @@ class Repository():
             secrets (List[Secret]): List of repo level secret wrapper objects.
         """
         self.secrets = secrets
+        self.permission_data['read_repo_secrets'] = True
 
     def set_runners(self, runners: list[Runner]):
         """Sets list of self-hosted runners attached at the repository level.
         """
         self.sh_runner_access = True
         self.runners = runners
+        self.permission_data['admin_repo_runners'] = True
 
     def add_self_hosted_workflows(self, workflows: list):
         """Add a list of workflow file names that run on self-hosted runners.
@@ -144,8 +146,7 @@ class Repository():
             "can_fork": self.can_fork(),
             "stars": self.repo_data['stargazers_count'],
             "runner_workflows": [wf for wf in self.sh_workflow_names],
-            "accessible_runners": [runner.toJSON() for runner
-                                   in self.accessible_runners],
+            "accessible_runners": [runner.toJSON() for runner in self.accessible_runners],
             "repo_runners": [runner.toJSON() for runner in self.runners],
             "repo_secrets": [secret.toJSON() for secret in self.secrets],
             "org_secrets": [secret.toJSON() for secret in self.org_secrets],
