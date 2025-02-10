@@ -146,18 +146,18 @@ class Enumerator:
     def self_enumeration(self):
         """Enumerates all organizations associated with the authenticated user."""
         if not self.__setup_user_info():
-            return False
+            return False, ([], [])
 
         if "repo" not in self.user_perms["scopes"]:
             Output.error("Self-enumeration requires the repo scope!")
-            return False
+            return False, ([], [])
 
         Output.info("Enumerating user owned repositories!")
 
         repos = self.api.get_own_repos()
         if not repos:
             Output.warn("No repositories found for the authenticated user.")
-            return False, []
+            return True, ([], [])
 
         repo_wrappers = self.enumerate_repos(repos)
         orgs = self.api.check_organizations()
@@ -177,7 +177,7 @@ class Enumerator:
     def enumerate_user(self, user: str):
         """Enumerate a user's repositories."""
         if not self.__setup_user_info():
-            return False, []
+            return False, ([], [])
 
         repos = self.api.get_user_repos(user)
 
@@ -186,7 +186,7 @@ class Enumerator:
                 f"Unable to query the user: {Output.bright(user)}! Ensure the "
                 "user exists!"
             )
-            return False, []
+            return False, ([], [])
 
         Output.result(f"Enumerating the {Output.bright(user)} user!")
 
@@ -231,13 +231,6 @@ class Enumerator:
         if not enum_list:
             Output.warn(f"No repositories found in {org} organization.")
             return organization
-
-        Output.info(
-            f"About to enumerate "
-            f"{len(enum_list)} "
-            "non-archived repos within "
-            f"the {organization.name} organization!"
-        )
 
         Output.info(f"Querying and caching workflow YAML files!")
         wf_queries = GqlQueries.get_workflow_ymls(enum_list)
@@ -326,11 +319,11 @@ class Enumerator:
             repo_names (list): Repository name in {Org/Owner}/Repo format.
         """
         if not self.__setup_user_info():
-            return False, []
+            return False, ([], [])
 
         if not repo_names:
             Output.error("The list of repositories was empty!")
-            return False, []
+            return False, ([], [])
 
         Output.info(
             f"Querying and caching workflow YAML files "
