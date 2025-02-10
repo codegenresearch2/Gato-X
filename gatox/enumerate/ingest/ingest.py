@@ -42,8 +42,8 @@ class DataIngestor:
                 'stargazers_count': result['stargazers']['totalCount'],
                 'pushed_at': result['pushedAt'],
                 'permissions': {
-                    'pull': result['viewerPermission'] in ['READ', 'TRIAGE', 'WRITE', 'MAINTAIN', 'ADMIN'],
-                    'push': result['viewerPermission'] in ['WRITE', 'MAINTAIN', 'ADMIN'],
+                    'pull': result['viewerPermission'] == 'READ' or result['viewerPermission'] == 'TRIAGE' or result['viewerPermission'] == 'WRITE' or result['viewerPermission'] == 'MAINTAIN' or result['viewerPermission'] == 'ADMIN',
+                    'push': result['viewerPermission'] == 'WRITE' or result['viewerPermission'] == 'MAINTAIN' or result['viewerPermission'] == 'ADMIN',
                     'admin': result['viewerPermission'] == 'ADMIN'
                 },
                 'archived': result['isArchived'],
@@ -53,8 +53,8 @@ class DataIngestor:
             }
 
             # Handle environments, excluding 'github-pages'
-            # Capture environments not named github-pages
             if 'environments' in result and result['environments']:
+                # Capture environments not named github-pages
                 envs = [env['node']['name'] for env in result['environments']['edges'] if env['node']['name'] != 'github-pages']
                 repo_data['environments'] = envs
 
