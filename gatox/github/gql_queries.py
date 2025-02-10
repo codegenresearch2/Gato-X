@@ -1,4 +1,4 @@
-class GqlQueries():
+class GqlQueries:
     """Constructs graphql queries for use with the GitHub GraphQL api.
     """
 
@@ -32,6 +32,15 @@ class GqlQueries():
                 }
             }
         }
+        environments(first: 100) {
+            edges {
+                node {
+                    id
+                    name
+                }
+            }
+        }
+        forkingAllowed
     }
     """
 
@@ -67,54 +76,17 @@ class GqlQueries():
                         }
                     }
                 }
-            }
-        }
-    }
-    """
-
-    GET_YMLS_ENV = """
-        query RepoFiles($node_ids: [ID!]!) {
-            nodes(ids: $node_ids) {
-                ... on Repository {
-                    nameWithOwner
-                    isPrivate
-                    isArchived
-                    stargazers {
-                        totalCount
-                    }
-                    viewerPermission
-                    pushedAt
-                    url
-                    isFork
-                    environments(first: 100) {
-                        edges {
+                environments(first: 100) {
+                    edges {
                         node {
                             id
                             name
                         }
                     }
-                    }
-                    defaultBranchRef {
-                        name
-                    }
-                    object(expression: "HEAD:.github/workflows/") {
-                        ... on Tree {
-                            entries {
-                                name
-                                type
-                                mode
-                                object {
-                                    ... on Blob {
-                                        byteSize
-                                        text
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
+    }
     """
 
     @staticmethod
@@ -124,7 +96,7 @@ class GqlQueries():
         files from a list of repositories.
 
         This method splits the list of repositories into chunks of 
-        up to 100 repositories each, and constructs a separate
+        up to 50 repositories each, and constructs a separate
         GraphQL query for each chunk. Each query fetches the workflow 
         YAML files from the repositories in one chunk.
 
