@@ -71,7 +71,7 @@ class GqlQueries:
         files from a list of repositories.
 
         This method splits the list of repositories into chunks of 
-        50 repositories each, and constructs a separate
+        100 repositories each, and constructs a separate
         GraphQL query for each chunk. Each query fetches the workflow 
         YAML files from the repositories in one chunk.
 
@@ -87,8 +87,8 @@ class GqlQueries:
         
         queries = []
 
-        for i in range(0, len(repos), 50):
-            chunk = repos[i:i + 50]
+        for i in range(0, len(repos), 100):
+            chunk = repos[i:i + 100]
             repo_queries = []
 
             for j, repo in enumerate(chunk):
@@ -120,16 +120,16 @@ class GqlQueries:
         if len(repos) == 0:
             return queries
 
-        for i in range(0, (len(repos) // 50) + 1):
+        for i in range(0, (len(repos) // 100) + 1):
 
-            top_len = len(repos) if len(repos) < (50 + i*50) else (50 + i*50)
+            top_len = len(repos) if len(repos) < (100 + i*100) else (100 + i*100)
             query = {
                 # We list envs if we have write access to one in the set (for secrets
                 # reasons, otherwise we don't list them)
-                "query": GqlQueries.GET_YMLS_ENV if repos[0].can_push() else GqlQueries.GET_YMLS,
+                "query": GqlQueries.GET_YMLS_ENV if repos[i].can_push() else GqlQueries.GET_YMLS,
                 "variables": {
                     "node_ids": [
-                        repo.repo_data['node_id'] for repo in repos[0+50*i:top_len]
+                        repo.repo_data['node_id'] for repo in repos[0+100*i:top_len]
                     ]
                 }
             }
