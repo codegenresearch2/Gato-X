@@ -40,10 +40,10 @@ class Execution:
         self.user_details = user_details
 
     def toJSON(self) -> dict:
-        """Converts the run to Gato JSON representation.
+        """Convert the execution run to a JSON representation.
 
         Returns:
-            dict: JSON representation of the run.
+            dict: JSON representation of the execution run.
         """
         if self.user_details:
             return {
