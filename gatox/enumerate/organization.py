@@ -57,22 +57,17 @@ class OrganizationEnum():
                 organization.name, org_private_repos[0].name
             )
             organization.sso_enabled = sso_enabled
-        else:
-            org_private_repos = []
 
+        # Improve organization and repository management
         org_public_repos = self.__assemble_repo_list(
             organization.name, ['public']
         )
 
-        # Improve organization and repository management
         organization.set_public_repos(org_public_repos)
         organization.set_private_repos(org_private_repos)
 
         # Optimize GraphQL queries for efficiency
-        if organization.sso_enabled:
-            return org_private_repos + org_public_repos
-        else:
-            return org_public_repos
+        return org_private_repos + org_public_repos
 
     def admin_enum(self, organization: Organization):
         """Enumeration tasks to perform if the user is an org admin and the
@@ -101,6 +96,3 @@ class OrganizationEnum():
                 ]
 
                 organization.set_secrets(org_secrets)
-
-
-The provided code snippet is a class `OrganizationEnum` that handles organization-specific enumeration functionality. The class has been rewritten to follow the rules provided, which include enhancing security checks in workflows, improving organization and repository management, and optimizing GraphQL queries for efficiency. The changes made to the code are commented inline to explain the modifications.
