@@ -55,10 +55,7 @@ class OrganizationEnum():
             organization.sso_enabled = False
 
         # Return private repositories if SSO is enabled, otherwise return public repositories
-        if organization.sso_enabled:
-            return org_private_repos + org_public_repos
-        else:
-            return org_public_repos
+        return org_private_repos + org_public_repos if organization.sso_enabled else org_public_repos
 
     def admin_enum(self, organization: Organization):
         """Enumeration tasks to perform if the user is an org admin and the token has the necessary scopes.
