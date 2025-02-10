@@ -33,9 +33,13 @@ class WorkflowParser:
             raise ValueError("Received invalid workflow!")
 
         self.parsed_yml = workflow_wrapper.parsed_yml
+        if self.parsed_yml is None:
+            raise ValueError("Workflow wrapper does not contain valid parsed YAML data.")
+
         self.jobs = []
-        if self.parsed_yml and 'jobs' in self.parsed_yml:
+        if 'jobs' in self.parsed_yml and self.parsed_yml['jobs'] is not None:
             self.jobs = [Job(job_data, job_name) for job_name, job_data in self.parsed_yml['jobs'].items()]
+
         self.raw_yaml = workflow_wrapper.workflow_contents
         self.repo_name = workflow_wrapper.repo_name
         self.wf_name = workflow_wrapper.workflow_name
@@ -52,5 +56,26 @@ class WorkflowParser:
             self.branch = None
 
         self.composites = self.extract_referenced_actions()
+
+    def extract_referenced_actions(self):
+        """
+        Extracts composite actions from the workflow file.
+
+        Returns:
+            dict: Dictionary containing referenced actions.
+        """
+        referenced_actions = {}
+        vulnerable_triggers = self.get_vulnerable_triggers()
+        if not vulnerable_triggers:
+            return referenced_actions
+
+        for job in self.jobs:
+            for step in job.steps:
+                if step.type == 'ACTION':
+                    action_parts = decompose_action_ref(step.uses, step.step_data, self.repo_name)
+                    if action_parts:
+                        referenced_actions[step.uses] = action_parts
+
+        return referenced_actions
 
     # Rest of the code remains the same
