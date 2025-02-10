@@ -11,9 +11,7 @@ from gatox.util.arg_utils import is_valid_directory
 @pytest.fixture(autouse=True)
 def mock_settings_env_vars(request):
     """Mock the environment variables for the tests."""
-    with mock.patch.dict(
-        os.environ, {"GH_TOKEN": "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"}
-    ):
+    with mock.patch.dict(os.environ, {"GH_TOKEN": "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"}):
         yield
 
 def test_cli_no_gh_token(capfd):
