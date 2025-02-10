@@ -25,7 +25,7 @@ class Enumerator:
         pat: str,
         socks_proxy: str = None,
         http_proxy: str = None,
-        output_yaml: bool = False,
+        output_yaml: str = None,
         skip_log: bool = False,
         github_url: str = None,
         output_json: str = None,
@@ -38,8 +38,8 @@ class Enumerator:
             Defaults to None.
             http_proxy (str, optional): Proxy gettings for HTTP proxy.
             Defaults to None.
-            output_yaml (bool, optional): If set, directory to save all yml
-            files to . Defaults to False.
+            output_yaml (str, optional): If set, directory to save all yml
+            files to . Defaults to None.
             skip_log (bool, optional): If set, then run logs will not be
             downloaded.
             output_json (str, optional): JSON file to output enumeration
@@ -48,7 +48,7 @@ class Enumerator:
         assert isinstance(pat, str), "pat must be a string"
         assert socks_proxy is None or isinstance(socks_proxy, str), "socks_proxy must be a string or None"
         assert http_proxy is None or isinstance(http_proxy, str), "http_proxy must be a string or None"
-        assert isinstance(output_yaml, bool), "output_yaml must be a boolean"
+        assert output_yaml is None or isinstance(output_yaml, str), "output_yaml must be a string or None"
         assert isinstance(skip_log, bool), "skip_log must be a boolean"
         assert github_url is None or isinstance(github_url, str), "github_url must be a string or None"
         assert output_json is None or isinstance(output_json, str), "output_json must be a string or None"
@@ -110,12 +110,3 @@ class Enumerator:
         return True
 
     # Rest of the code remains the same
-
-In the updated code, I have made the following changes:
-
-1. Modified the `output_yaml` parameter in the `__init__` method to be a boolean.
-2. Updated the `__setup_user_info` method to handle the logic for checking the installation information and user permissions in a way that matches the gold code.
-3. Added an error message for an invalid GitHub App installation token.
-4. Ensured that the error messages and conditions are consistent with the gold code.
-5. Maintained the consistency in how lists and conditions are handled.
-6. Ensured that the docstrings are consistent with the gold code in terms of formatting and detail.
