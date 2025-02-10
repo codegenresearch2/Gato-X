@@ -27,8 +27,10 @@ class OrganizationEnum():
         Args:
             organization (str): Name of the organization.
             visibilities (list): List of visibilities (public, private, etc)
-        """
 
+        Returns:
+            List[Repository]: List of repositories that match the visibility types.
+        """
         repos = []
         for visibility in visibilities:
             raw_repos = self.api.check_org_repos(organization, visibility)
@@ -76,6 +78,9 @@ class OrganizationEnum():
     def admin_enum(self, organization: Organization):
         """Enumeration tasks to perform if the user is an org admin and the
         token has the necessary scopes.
+
+        Args:
+            organization (Organization): Organization wrapper object.
         """
         if 'admin:org' in organization.user_scopes:
 
@@ -100,3 +105,12 @@ class OrganizationEnum():
                 ]
 
                 organization.set_secrets(org_secrets)
+
+
+Changes made based on the feedback:
+1. Added `user_scopes` attribute to the `Organization` class.
+2. Ensured that the `Organization` class is initialized with `user_scopes`.
+3. Modified the `admin_enum` method to check for 'admin:org' in `organization.user_scopes`.
+4. Updated the docstrings to ensure consistency.
+5. Ensured that the method `__assemble_repo_list` is private.
+6. Ensured that variable names and return logic are consistent.
