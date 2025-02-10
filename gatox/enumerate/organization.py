@@ -28,13 +28,7 @@ class OrganizationEnum():
             visibilities (list): List of visibilities (public, private, etc)
         """
 
-        repos = []
-        for visibility in visibilities:
-            raw_repos = self.api.check_org_repos(organization, visibility)
-            if raw_repos:
-                repos.extend([Repository(repo) for repo in raw_repos])
-
-        return repos
+        return [Repository(repo) for visibility in visibilities for repo in self.api.check_org_repos(organization, visibility)]
 
     def construct_repo_enum_list(
             self, organization: Organization) -> List[Repository]:
@@ -47,58 +41,27 @@ class OrganizationEnum():
         Returns:
             List[Repository]: List of repositories to enumerate.
         """
-        org_private_repos = self.__assemble_repo_list(
-            organization.name, ['private', 'internal']
-        )
-
-        # Enhance security checks in workflows
-        if org_private_repos:
-            sso_enabled = self.api.validate_sso(
-                organization.name, org_private_repos[0].name
-            )
-            organization.sso_enabled = sso_enabled
-        else:
-            # Adding a comment to clarify the possibility of no private repos
-            org_private_repos = []  # Explicitly set to an empty list if no private repos
-
-        # Improve organization and repository management
-        org_public_repos = self.__assemble_repo_list(
-            organization.name, ['public']
-        )
+        org_private_repos = self.__assemble_repo_list(organization.name, ['private', 'internal'])
+        org_public_repos = self.__assemble_repo_list(organization.name, ['public'])
 
         organization.set_public_repos(org_public_repos)
         organization.set_private_repos(org_private_repos)
 
-        # Optimize GraphQL queries for efficiency
-        if organization.sso_enabled:
-            return org_private_repos + org_public_repos
-        else:
-            return org_public_repos
+        organization.sso_enabled = self.api.validate_sso(organization.name, org_private_repos[0].name) if org_private_repos else False
+
+        return org_private_repos + org_public_repos if organization.sso_enabled else org_public_repos
 
     def admin_enum(self, organization: Organization):
         """Enumeration tasks to perform if the user is an org admin and the
         token has the necessary scopes.
         """
         if organization.org_admin_scopes and organization.org_admin_user:
-
             runners = self.api.check_org_runners(organization.name)
             if runners:
-                org_runners = [
-                    Runner(
-                        runner['name'],
-                        machine_name=None,
-                        os=runner['os'],
-                        status=runner['status'],
-                        labels=runner['labels']
-                    )
-                    for runner in runners['runners']
-                ]
+                org_runners = [Runner(runner['name'], machine_name=None, os=runner['os'], status=runner['status'], labels=runner['labels']) for runner in runners['runners']]
                 organization.set_runners(org_runners)
 
             org_secrets = self.api.get_org_secrets(organization.name)
             if org_secrets:
-                org_secrets = [
-                    Secret(secret, organization.name) for secret in org_secrets
-                ]
-
+                org_secrets = [Secret(secret, organization.name) for secret in org_secrets]
                 organization.set_secrets(org_secrets)
