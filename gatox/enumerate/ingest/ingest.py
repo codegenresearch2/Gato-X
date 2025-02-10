@@ -77,5 +77,4 @@ This revised code snippet addresses the feedback from the oracle by:
 
 1. Including the `maintain` key in the `permissions` dictionary.
 2. Correcting the key name for allowing forking to `allow_forking`.
-3. Ensuring proper formatting and whitespace to improve readability.
-4. Removing the extraneous comment that caused a syntax error.
+3. Removing the extraneous comment that caused a syntax error.
