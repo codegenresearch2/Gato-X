@@ -1,5 +1,4 @@
 import datetime
-
 from gatox.models.runner import Runner
 from gatox.models.secret import Secret
 
@@ -48,7 +47,7 @@ class Repository():
         return self.permission_data.get('pull', False)
 
     def is_private(self):
-        return self.repo_data['visibility'] != 'public'
+        return self.repo_data['private']
     
     def is_archived(self):
         return self.repo_data['archived']
