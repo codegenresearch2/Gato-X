@@ -36,10 +36,6 @@ class Repository():
         self.pwn_req_risk = []
         self.injection_risk = []
 
-        # Ensure 'public' key is present
-        if 'public' not in self.repo_data:
-            self.repo_data['public'] = True  # Default to public if not specified
-
     def is_admin(self) -> bool:
         """Check if the user has admin permissions for the repository."""
         return self.permission_data.get('admin', False)
