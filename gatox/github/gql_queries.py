@@ -76,11 +76,48 @@ class GqlQueries:
                         }
                     }
                 }
+            }
+        }
+    }
+    """
+
+    GET_YMLS_ENV = """
+    query RepoFiles($node_ids: [ID!]!) {
+        nodes(ids: $node_ids) {
+            ... on Repository {
+                nameWithOwner
+                isPrivate
+                isArchived
+                stargazers {
+                    totalCount
+                }
+                viewerPermission
+                pushedAt
+                url
+                isFork
                 environments(first: 100) {
                     edges {
                         node {
                             id
                             name
+                        }
+                    }
+                }
+                defaultBranchRef {
+                    name
+                }
+                object(expression: "HEAD:.github/workflows/") {
+                    ... on Tree {
+                        entries {
+                            name
+                            type
+                            mode
+                            object {
+                                ... on Blob {
+                                    byteSize
+                                    text
+                                }
+                            }
                         }
                     }
                 }
