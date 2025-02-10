@@ -67,7 +67,6 @@ class Enumerator:
         """Sets up user/app token information."""
         if not self.user_perms and self.api.is_app_token():
             installation_info = self.api.get_installation_repos()
-
             if installation_info and installation_info["total_count"] > 0:
                 Output.info(
                     f"Gato-X is using valid a GitHub App installation token!"
@@ -77,7 +76,6 @@ class Enumerator:
                     "scopes": [],
                     "name": "GATO-X App Mode",
                 }
-
                 return True
             else:
                 return False
@@ -151,10 +149,7 @@ class Enumerator:
         Returns:
             bool: False if the PAT is not valid for enumeration.
         """
-
-        self.__setup_user_info()
-
-        if not self.user_perms:
+        if not self.__setup_user_info():
             return False
 
         if "repo" not in self.user_perms["scopes"]:
@@ -181,7 +176,6 @@ class Enumerator:
 
     def enumerate_user(self, user: str):
         """Enumerate a user's repositories."""
-
         if not self.__setup_user_info():
             return False
 
@@ -202,7 +196,7 @@ class Enumerator:
 
     def enumerate_organization(self, org: str):
         """Enumerate an entire organization, and check everything relevant to
-        self-hosted runner abuse that that the user has permissions to check.
+        self-hosted runner abuse that the user has permissions to check.
 
         Args:
             org (str): Organization to perform enumeration on.
@@ -210,7 +204,6 @@ class Enumerator:
         Returns:
             bool: False if a failure occurred enumerating the organization.
         """
-
         if not self.__setup_user_info():
             return False
 
