@@ -17,6 +17,7 @@ class GqlQueries():
         defaultBranchRef {
             name
         }
+        forkingAllowed
         object(expression: "HEAD:.github/workflows/") {
             ... on Tree {
                 entries {
@@ -44,7 +45,9 @@ class GqlQueries():
     GET_YMLS = """
     query RepoFiles($node_ids: [ID!]!) {
         nodes(ids: $node_ids) {
-            ...repoWorkflows
+            ... on Repository {
+                ...repoWorkflows
+            }
         }
     }
     """
@@ -52,12 +55,14 @@ class GqlQueries():
     GET_YMLS_ENV = """
     query RepoFiles($node_ids: [ID!]!) {
         nodes(ids: $node_ids) {
-            ...repoWorkflows
-            environments(first: 100) {
-                edges {
-                    node {
-                        id
-                        name
+            ... on Repository {
+                ...repoWorkflows
+                environments(first: 100) {
+                    edges {
+                        node {
+                            id
+                            name
+                        }
                     }
                 }
             }
@@ -72,7 +77,7 @@ class GqlQueries():
         files from a list of repositories.
 
         This method splits the list of repositories into chunks of
-        up to 50 repositories each, and constructs a separate
+        up to 100 repositories each, and constructs a separate
         GraphQL query for each chunk. Each query fetches the workflow
         YAML files from the repositories in one chunk.
 
@@ -88,8 +93,8 @@ class GqlQueries():
 
         queries = []
 
-        for i in range(0, len(repos), 50):
-            chunk = repos[i:i + 50]
+        for i in range(0, len(repos), 100):
+            chunk = repos[i:i + 100]
             repo_queries = []
 
             for j, repo in enumerate(chunk):
@@ -134,10 +139,3 @@ class GqlQueries():
 
             queries.append(query)
         return queries
-
-
-In the rewritten code, I have enhanced repository management functionality by adding a `permissions` field to the `repoWorkflows` fragment. This field includes `pull`, `push`, `maintain`, and `admin` permissions for each repository.
-
-I have improved permission handling for repositories by modifying the `get_workflow_ymls` method to check for `push` permissions when determining whether to include environment information in the GraphQL query.
-
-I have streamlined organization repository classification logic by moving the repository permission check to the `get_workflow_ymls` method and using the `any` function to check if any repository in the chunk has `push` permissions. This allows for more efficient querying of environment information.
