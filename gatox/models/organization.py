@@ -83,10 +83,10 @@ class Organization():
         Args:
             repo (Repository): The repository to add.
         """
-        if repo.is_public():
-            self.public_repos.append(repo)
-        else:
+        if repo.is_private():
             self.private_repos.append(repo)
+        else:
+            self.public_repos.append(repo)
 
     def toJSON(self):
         """Converts the repository to a Gato JSON representation.
@@ -103,7 +103,7 @@ class Organization():
                 "org_member": self.org_member,
                 "org_runners": [runner.toJSON() for runner in self.runners],
                 "org_secrets": [secret.toJSON() for secret in self.secrets],
-                "sso_enabled": self.sso_enabled,
+                "sso_access": self.sso_enabled,
                 "public_repos": [repository.toJSON() for repository in self.public_repos],
                 "private_repos": [repository.toJSON() for repository in self.private_repos]
             }
