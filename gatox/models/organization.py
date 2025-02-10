@@ -46,10 +46,10 @@ class Organization():
             self.org_member = False
 
     def set_secrets(self, secrets: List[Secret]):
-        """Set organization-level secrets.
+        """Set repo-level secrets.
 
         Args:
-            secrets (List[Secret]): List of secrets at the organization level.
+            secrets (List[Secret]): List of secrets at the repository level.
         """
         self.secrets = secrets
 
