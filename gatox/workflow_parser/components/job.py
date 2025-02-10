@@ -73,7 +73,7 @@ class Job():
 
         if 'runs-on' in self.job_data:
             self.runner = self.job_data['runs-on']
-            self.__process_runner()
+            self.__process_runner(self.runner)
 
     def evaluateIf(self):
         """Evaluate the If expression by parsing it into an AST
@@ -103,26 +103,26 @@ class Job():
         """
         return self.has_gate or (self.evaluateIf() and self.evaluateIf().startswith("RESTRICTED"))
 
-    def __process_runner(self):
+    def __process_runner(self, runs_on):
         """
         Processes the runner for the job.
         """
-        if isinstance(self.runner, str):
-            if self.runner.startswith('self-hosted'):
+        if isinstance(runs_on, str):
+            if runs_on.startswith('self-hosted'):
                 # Logic to track self-hosted runners
                 pass
-            elif self.runner in ConfigurationManager().WORKFLOW_PARSING['LARGER_RUNNERS']:
+            elif 'LARGER_RUNNERS' in ConfigurationManager().WORKFLOW_PARSING and runs_on in ConfigurationManager().WORKFLOW_PARSING['LARGER_RUNNERS']:
                 # Logic for larger runners
                 pass
-        elif isinstance(self.runner, list):
+        elif isinstance(runs_on, list):
             # Process matrix-based runners
-            self.__process_matrix()
+            self.__process_matrix(runs_on)
 
-    def __process_matrix(self):
+    def __process_matrix(self, runs_on):
         """
         Processes the runner for the job when it is specified via a matrix.
         """
-        matrix_keys = self.MATRIX_KEY_EXTRACTION_REGEX.findall(self.runner[0])
+        matrix_keys = self.MATRIX_KEY_EXTRACTION_REGEX.findall(runs_on[0])
         if matrix_keys:
             # Logic to process matrix jobs
             pass
