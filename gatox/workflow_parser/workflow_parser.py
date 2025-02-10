@@ -50,4 +50,28 @@ class WorkflowParser:
         self.branch = workflow_wrapper.branch if self.external_path else non_default
         self.composites = self.extract_referenced_actions()
 
+    def extract_referenced_actions(self):
+        """
+        Extracts composite actions from the workflow file.
+
+        Returns:
+            dict: A dictionary containing the referenced actions.
+        """
+        referenced_actions = {}
+        vulnerable_triggers = self.get_vulnerable_triggers()
+        if not vulnerable_triggers:
+            return referenced_actions
+
+        if 'jobs' not in self.parsed_yml:
+            return referenced_actions
+
+        for job in self.jobs:
+            for step in job.steps:
+                if step.type == 'ACTION':
+                    action_parts = decompose_action_ref(step.uses, step.step_data, self.repo_name)
+                    if action_parts:
+                        referenced_actions[step.uses] = action_parts
+
+        return referenced_actions
+
     # Rest of the code...
