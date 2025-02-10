@@ -10,17 +10,22 @@ from gatox.cli.output import Output
 # Constants
 TEST_REPO_DATA = None
 TEST_WORKFLOW_YML = None
+TEST_ORG_DATA = None
 
 # Fixtures
 @pytest.fixture(scope="session", autouse=True)
 def load_test_files(request):
-    global TEST_REPO_DATA, TEST_WORKFLOW_YML
+    global TEST_REPO_DATA, TEST_WORKFLOW_YML, TEST_ORG_DATA
     curr_path = pathlib.Path(__file__).parent.resolve()
     test_repo_path = os.path.join(curr_path, "files/example_repo.json")
+    test_org_path = os.path.join(curr_path, "files/example_org.json")
     test_wf_path = os.path.join(curr_path, "files/main.yaml")
 
     with open(test_repo_path, "r") as repo_data:
         TEST_REPO_DATA = json.load(repo_data)
+
+    with open(test_org_path, "r") as org_data:
+        TEST_ORG_DATA = json.load(org_data)
 
     with open(test_wf_path, "r") as wf_data:
         TEST_WORKFLOW_YML = wf_data.read()
@@ -28,6 +33,7 @@ def load_test_files(request):
 @patch("gatox.enumerate.enumerate.Api")
 def test_bad_token(mock_api, capsys):
     """Test the behavior when an invalid token is used."""
+    Output(True)
     gh_enumeration_runner = Enumerator(
         "ghp_BADTOKEN",
         socks_proxy=None,
