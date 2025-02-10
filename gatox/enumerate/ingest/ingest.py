@@ -43,11 +43,10 @@ class DataIngestor:
                 'permissions': {
                     'pull': result['viewerPermission'] in ['READ', 'TRIAGE', 'WRITE', 'MAINTAIN', 'ADMIN'],
                     'push': result['viewerPermission'] in ['WRITE', 'MAINTAIN', 'ADMIN'],
-                    'maintain': result['viewerPermission'] == 'MAINTAIN',
                     'admin': result['viewerPermission'] == 'ADMIN'
                 },
                 'archived': result['isArchived'],
-                'is_fork': result['isFork'],
+                'isFork': result['isFork'],
                 'environments': []
             }
 
