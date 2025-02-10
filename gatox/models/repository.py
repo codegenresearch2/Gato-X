@@ -18,9 +18,9 @@ class Repository():
             GitHub
         """
         self.repo_data = repo_data
-        # Ensure 'public' key is present
-        if 'public' not in self.repo_data:
-            self.repo_data['public'] = True  # Default to public if not specified
+        # Ensure 'environments' key is present
+        if 'environments' not in self.repo_data:
+            self.repo_data['environments'] = []
 
         self.name = self.repo_data['full_name']
         self.org_name = self.name.split('/')[0]
@@ -54,7 +54,7 @@ class Repository():
 
     def is_private(self) -> bool:
         """Check if the repository is private."""
-        return not self.repo_data['public']
+        return self.repo_data['visibility'] != 'public'
     
     def is_archived(self) -> bool:
         """Check if the repository is archived."""
