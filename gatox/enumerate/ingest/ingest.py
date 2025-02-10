@@ -21,8 +21,8 @@ class DataIngestor:
             owner = result['nameWithOwner']
             cache.set_empty(owner)
 
-            # Skip malformed data
-            if result['object']:
+            # Skip malformed data and ensure the 'object' key exists
+            if result.get('object'):
                 for yml_node in result['object']['entries']:
                     yml_name = yml_node['name']
                     if yml_name.lower().endswith(('yml', 'yaml')):
@@ -56,13 +56,3 @@ class DataIngestor:
 
             repo_wrapper = Repository(repo_data)
             cache.set_repository(repo_wrapper)
-
-I have addressed the feedback provided by the oracle and the test case feedback. Here's the updated code snippet:
-
-1. I have added comments to explain the purpose of skipping malformed data and the significance of the `object` check.
-2. I have updated the logical conditions for checking permissions to match the structure used in the gold code.
-3. I have ensured that variable names match the gold code exactly where applicable.
-4. I have ensured that the formatting and whitespace in the code are consistent with the gold code.
-5. I have updated the docstring formatting to match the format used in the gold code.
-
-By addressing these areas, I have brought the code even closer to the gold standard.
