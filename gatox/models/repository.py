@@ -13,10 +13,12 @@ class Repository():
         """Initialize wrapper class.
 
         Args:
-            repo_json (dict): Dictionary from parsing JSON object returned from
+            repo_data (dict): Dictionary from parsing JSON object returned from
             GitHub
         """
         self.repo_data = repo_data
+        # Ensure 'public' key is present in repo_data
+        self.repo_data.setdefault('public', False)
         # Temporary hack until full transition to GQL
         if 'environments' not in self.repo_data:
             self.repo_data['environments'] = []
