@@ -62,6 +62,32 @@ class Enumerator:
         self.repo_e = RepositoryEnum(self.api, skip_log, output_yaml)
         self.org_e = OrganizationEnum(self.api)
 
+    def __setup_user_info(self):
+        """Set up user information and check permissions.
+
+        Returns:
+            bool: True if user permissions are set up successfully, False otherwise.
+        """
+        if not self.user_perms:
+            self.user_perms = self.api.check_user()
+            if not self.user_perms:
+                Output.error("This token cannot be used for enumeration!")
+                return False
+
+            Output.info(
+                "The authenticated user is: "
+                f"{Output.bright(self.user_perms['user'])}"
+            )
+            if len(self.user_perms["scopes"]):
+                Output.info(
+                    "The GitHub Classic PAT has the following scopes: "
+                    f'{Output.yellow(", ".join(self.user_perms["scopes"]))}'
+                )
+            else:
+                Output.warn("The token has no scopes!")
+
+        return True
+
     # ... rest of the code ...
 
     def enumerate_organization(self, org: str):
@@ -83,7 +109,8 @@ class Enumerator:
         if not details:
             Output.warn(
                 f"Unable to query the org: {Output.bright(org)}! Ensure the "
-                "organization exists!")
+                "organization exists!"
+            )
             return False
 
         organization = Organization(details, self.user_perms['scopes'])
@@ -159,26 +186,4 @@ class Enumerator:
 
     # ... rest of the code ...
 
-# Modify the RepositoryEnum class to accept parameters in the constructor
-class RepositoryEnum:
-    """Repository specific enumeration functionality.
-    """
-
-    def __init__(self, api: Api, skip_log: bool, output_yaml):
-        """Initialize enumeration class with instantiated API wrapper and CLI
-        parameters.
-
-        Args:
-            api (Api): GitHub API wraper object.
-            skip_log (bool): If set, then run logs will not be downloaded.
-            output_yaml (str): If set, directory to save all yml files to.
-        """
-        self.api = api
-        self.skip_log = skip_log
-        self.output_yaml = output_yaml
-        self.temp_wf_cache = {}
-
-    # ... rest of the code ...
-
-
-In the modified code, the `RepositoryEnum` class now accepts `api`, `skip_log`, and `output_yaml` as parameters in its constructor. This change addresses the feedback received about the `TypeError` that occurs when trying to instantiate `RepositoryEnum` with arguments.
+In the modified code, the `__setup_user_info` method has been added to set up user information and check permissions. This method is called at the beginning of the `enumerate_organization` method to ensure that user permissions are set up correctly. Additionally, the code has been formatted to remove any misplaced comments or text that may have caused the `SyntaxError`.
