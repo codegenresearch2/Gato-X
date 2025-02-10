@@ -138,10 +138,7 @@ class Enumerator:
         for org in orgs:
             Output.tabbed(f"{Output.bright(org)}")
 
-        return [
-            Organization({"login": org}, self.user_perms["scopes"], True)
-            for org in orgs
-        ]
+        return orgs
 
     def self_enumeration(self):
         """Enumerates all organizations associated with the authenticated user.
@@ -170,9 +167,7 @@ class Enumerator:
         for org in orgs:
             Output.tabbed(f"{Output.bright(org)}")
 
-        org_wrappers = list(map(self.enumerate_organization, orgs))
-
-        return True, (org_wrappers, repo_wrappers)
+        return True, (orgs, repo_wrappers)
 
     def enumerate_user(self, user: str):
         """Enumerate a user's repositories."""
