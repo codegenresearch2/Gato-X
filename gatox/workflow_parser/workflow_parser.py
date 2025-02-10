@@ -15,10 +15,9 @@ limitations under the License.
 """
 
 import logging
-
-from pathlib import Path
 import os
 import re
+from pathlib import Path
 
 from gatox.configuration.configuration_manager import ConfigurationManager
 from gatox.workflow_parser.utility import filter_tokens, decompose_action_ref
@@ -31,7 +30,7 @@ logger = logging.getLogger(__name__)
 class WorkflowParser():
     """Parser for YML files.
 
-    This class is structurd to take a yaml file as input, it will then
+    This class is structured to take a yaml file as input, it will then
     expose methods that aim to answer questions about the yaml file.
 
     This will allow for growing what kind of analytics this tool can perform
@@ -142,8 +141,7 @@ class WorkflowParser():
         """
         vulnerable_triggers = []
         risky_triggers = ['pull_request_target', 'workflow_run', 
-                          'issue_comment', 'issues', 'discussion_comment', 'discussion'
-                          'fork', 'watch']
+                          'issue_comment', 'issues']
         if alternate:
             risky_triggers = [alternate]
 
@@ -205,11 +203,6 @@ class WorkflowParser():
             }
             step_details = []
             bump_confidence = False
-
-            if job.isCaller():
-                self.callees.append(job.uses.split('/')[-1])
-            elif job.external_caller:
-                self.callees.append(job.uses)
 
             if job_content['if_check'] and job_content['if_check'].startswith("RESTRICTED"):
                 job_content['gated'] = True
