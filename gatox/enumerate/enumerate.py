@@ -14,7 +14,6 @@ from gatox.caching.cache_manager import CacheManager
 
 logger = logging.getLogger(__name__)
 
-
 class Enumerator:
     """Class holding all high level logic for enumerating GitHub, whether it is
     a user's entire access, individual organizations, or repositories.
@@ -104,7 +103,7 @@ class Enumerator:
         for org in orgs:
             Output.tabbed(f"{Output.bright(org)}")
 
-        return [Organization({'login': org}, self.user_perms['scopes'], True) for org in orgs]
+        return [Organization({'login': org, 'allow_forking': True}, self.user_perms['scopes'], True) for org in orgs]
 
     def self_enumeration(self):
         """Enumerates all organizations associated with the authenticated user.
@@ -205,11 +204,9 @@ class Enumerator:
                 cached_repo = CacheManager().get_repository(repo.name)
                 if cached_repo:
                     repo = cached_repo
-                
+
                 self.repo_e.enumerate_repository(repo, large_org_enum=len(enum_list) > 25)
                 self.repo_e.enumerate_repository_secrets(repo)
-
-                organization.set_repository(repo)
 
                 Recommender.print_repo_secrets(
                     self.user_perms['scopes'],
@@ -249,11 +246,11 @@ class Enumerator:
                     f"Skipping archived repository: {Output.bright(repo.name)}!"
                 )
                 return False
-            
+
             Output.tabbed(
                     f"Enumerating: {Output.bright(repo.name)}!"
             )
-            
+
             self.repo_e.enumerate_repository(repo, large_org_enum=large_enum)
             self.repo_e.enumerate_repository_secrets(repo)
             Recommender.print_repo_secrets(
