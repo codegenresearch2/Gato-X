@@ -45,6 +45,7 @@ class DataIngestor:
                 'visibility': 'private' if result['isPrivate'] else 'public',
                 'default_branch': result['defaultBranchRef']['name'] if result['defaultBranchRef'] else 'main',
                 'fork': result['isFork'],
+                'allow_forking': result['forkingAllowed'],  # Added key
                 'stargazers_count': result['stargazers']['totalCount'],
                 'pushed_at': result['pushedAt'],
                 'permissions': {
@@ -56,7 +57,8 @@ class DataIngestor:
                     'push': result['viewerPermission'] == 'WRITE' or \
                         result['viewerPermission'] == 'MAINTAIN' or \
                         result['viewerPermission'] == 'ADMIN',
-                    'admin': result['viewerPermission'] == 'ADMIN'
+                    'admin': result['viewerPermission'] == 'ADMIN',
+                    'maintain': result['viewerPermission'] == 'MAINTAIN'  # Added key
                 },
                 'archived': result['isArchived'],
                 'isFork': result['isFork'],
