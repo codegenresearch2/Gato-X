@@ -40,16 +40,22 @@ class Execution:
         self.user_details = user_details
 
     def toJSON(self) -> dict:
-        """Converts the run to Gato JSON representation."""
-        return {
-            "username": self.user_details["user"],
-            "scopes": self.user_details["scopes"],
-            "enumeration": {
-                "timestamp": self.timestamp.ctime(),
-                "organizations": [org.toJSON() for org in self.organizations],
-                "repositories": [repo.toJSON() for repo in self.repositories],
-            },
-        }
+        """Converts the run to Gato JSON representation.
+
+        Returns:
+            dict: JSON representation of the run.
+        """
+        if self.user_details:
+            return {
+                "username": self.user_details["user"],
+                "scopes": self.user_details["scopes"],
+                "enumeration": {
+                    "timestamp": self.timestamp.ctime(),
+                    "organizations": [org.toJSON() for org in self.organizations],
+                    "repositories": [repo.toJSON() for repo in self.repositories],
+                },
+            }
+        return {}
 
     def enumerate_repositories(self, api, user_details: dict):
         """Enumerate repositories for the user.
