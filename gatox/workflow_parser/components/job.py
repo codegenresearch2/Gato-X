@@ -114,6 +114,10 @@ class Job():
             runner = self.job_data['runs-on']
             if isinstance(runner, str) and runner.startswith('self-hosted'):
                 return True
+            elif isinstance(runner, list):
+                for r in runner:
+                    if isinstance(r, str) and r.startswith('self-hosted'):
+                        return True
         return False
 
     def getJobDependencies(self):
