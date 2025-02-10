@@ -31,16 +31,21 @@ class Organization:
         """
         self.secrets = secrets
 
-    def set_repository(self, repo: Repository):
-        """Add a repository to the organization's list of repositories.
+    def set_public_repos(self, repos: list[Repository]):
+        """Set a list of public repositories that the organization can access.
 
         Args:
-            repo (Repository): Repository wrapper object.
+            repos (List[Repository]): List of public repositories that are attached to the organization.
         """
-        if repo.is_public():
-            self.public_repos.append(repo)
-        else:
-            self.private_repos.append(repo)
+        self.public_repos = repos
+
+    def set_private_repos(self, repos: list[Repository]):
+        """Set a list of private repositories that the organization can access.
+
+        Args:
+            repos (List[Repository]): List of private repositories that are attached to the organization.
+        """
+        self.private_repos = repos
 
     def set_runners(self, runners: list[Runner]):
         """Set a list of runners that the organization can access.
@@ -56,21 +61,18 @@ class Organization:
         Returns:
             dict: JSON representation of the organization.
         """
-        representation = {
-            "name": self.name,
-            "org_admin_user": self.org_admin_user,
-            "org_member": self.org_member,
-            "org_runners": [runner.toJSON() for runner in self.runners],
-            "org_secrets": [secret.toJSON() for secret in self.secrets],
-            "sso_access": self.sso_enabled,
-            "public_repos": [repository.toJSON() for repository in self.public_repos],
-            "private_repos": [repository.toJSON() for repository in self.private_repos]
-        }
-
         if self.limited_data:
             representation = {"name": self.name}
+        else:
+            representation = {
+                "name": self.name,
+                "org_admin_user": self.org_admin_user,
+                "org_member": self.org_member,
+                "org_runners": [runner.toJSON() for runner in self.runners],
+                "org_secrets": [secret.toJSON() for secret in self.secrets],
+                "sso_access": self.sso_enabled,
+                "public_repos": [repository.toJSON() for repository in self.public_repos],
+                "private_repos": [repository.toJSON() for repository in self.private_repos]
+            }
 
         return representation
-
-
-In the updated code, I have added the `set_repository` method to the `Organization` class. This method takes a `Repository` object as an argument and adds it to the appropriate list (`public_repos` or `private_repos`) based on its privacy status. I have also updated the `toJSON` method to construct the JSON representation based on the `limited_data` attribute at the beginning of the method.
