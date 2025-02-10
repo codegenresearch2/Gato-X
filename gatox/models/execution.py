@@ -1,5 +1,4 @@
 import datetime
-
 from gatox.models.organization import Organization
 from gatox.models.organization import Repository
 
@@ -9,10 +8,10 @@ class Execution:
 
     def __init__(self):
         """Initialize wrapper class."""
-        self.user_details: dict | None = None
-        self.organizations: list[Organization] = []
-        self.repositories: list[Repository] = []
-        self.timestamp: datetime.datetime = datetime.datetime.now()
+        self.user_details = None
+        self.organizations = []
+        self.repositories = []
+        self.timestamp = datetime.datetime.now()
 
     def add_organizations(self, organizations: list[Organization]):
         """Add list of organization wrapper objects.
