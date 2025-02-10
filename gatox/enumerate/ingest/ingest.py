@@ -36,7 +36,7 @@ class DataIngestor:
                 'full_name': result['nameWithOwner'],
                 'html_url': result['url'],
                 'visibility': 'private' if result['isPrivate'] else 'public',
-                'default_branch': result['defaultBranchRef']['name'] if 'defaultBranchRef' in result else 'main',
+                'default_branch': result.get('defaultBranchRef', {}).get('name', 'main'),
                 'fork': result['isFork'],
                 'stargazers_count': result['stargazers']['totalCount'],
                 'pushed_at': result['pushedAt'],
