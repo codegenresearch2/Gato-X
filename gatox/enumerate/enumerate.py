@@ -1,6 +1,5 @@
 import logging
-from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures import as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from gatox.github.api import Api
 from gatox.github.gql_queries import GqlQueries
@@ -69,21 +68,19 @@ class Enumerator:
         if not self.user_perms and self.api.is_app_token():
             installation_info = self.api.get_installation_repos()
 
-            if installation_info:
-                count = installation_info["total_count"]
-                if count > 0:
-                    Output.info(
-                        f"Gato-X is using valid a GitHub App installation token!"
-                    )
-                    self.user_perms = {
-                        "user": "Github App",
-                        "scopes": [],
-                        "name": "GATO-X App Mode",
-                    }
+            if installation_info and installation_info["total_count"] > 0:
+                Output.info(
+                    f"Gato-X is using valid a GitHub App installation token!"
+                )
+                self.user_perms = {
+                    "user": "Github App",
+                    "scopes": [],
+                    "name": "GATO-X App Mode",
+                }
 
-                    return True
-                else:
-                    return False
+                return True
+            else:
+                return False
 
         if not self.user_perms:
             self.user_perms = self.api.check_user()
@@ -95,7 +92,7 @@ class Enumerator:
                 "The authenticated user is: "
                 f"{Output.bright(self.user_perms['user'])}"
             )
-            if len(self.user_perms["scopes"]):
+            if self.user_perms["scopes"]:
                 Output.info(
                     "The GitHub Classic PAT has the following scopes: "
                     f'{Output.yellow(", ".join(self.user_perms["scopes"]))}'
@@ -153,7 +150,6 @@ class Enumerator:
 
         Returns:
             bool: False if the PAT is not valid for enumeration.
-            (list, list): Tuple containing list of orgs and list of repos.
         """
 
         self.__setup_user_info()
@@ -331,13 +327,12 @@ class Enumerator:
         Args:
             repo_names (list): Repository name in {Org/Owner}/Repo format.
         """
-        repo_wrappers = []
         if not self.__setup_user_info():
-            return repo_wrappers
+            return False
 
-        if len(repo_names) == 0:
+        if not repo_names:
             Output.error("The list of repositories was empty!")
-            return repo_wrappers
+            return
 
         Output.info(
             f"Querying and caching workflow YAML files "
@@ -346,6 +341,7 @@ class Enumerator:
         queries = GqlQueries.get_workflow_ymls_from_list(repo_names)
         self.__query_graphql_workflows(queries)
 
+        repo_wrappers = []
         try:
             for repo in repo_names:
                 repo_obj = self.enumerate_repo_only(repo, len(repo_names) > 100)
