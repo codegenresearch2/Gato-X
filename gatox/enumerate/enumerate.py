@@ -15,7 +15,6 @@ from gatox.caching.cache_manager import CacheManager
 
 logger = logging.getLogger(__name__)
 
-
 class Enumerator:
     """Class holding all high level logic for enumerating GitHub, whether it is
     a user's entire access, individual organizations, or repositories.
@@ -69,21 +68,17 @@ class Enumerator:
         if not self.user_perms and self.api.is_app_token():
             installation_info = self.api.get_installation_repos()
 
-            if installation_info:
-                count = installation_info["total_count"]
-                if count > 0:
-                    Output.info(
-                        f"Gato-X is using valid a GitHub App installation token!"
-                    )
-                    self.user_perms = {
-                        "user": "Github App",
-                        "scopes": [],
-                        "name": "GATO-X App Mode",
-                    }
-
-                    return True
-                else:
-                    return False
+            if installation_info and installation_info["total_count"] > 0:
+                Output.info(
+                    f"Gato-X is using valid a GitHub App installation token!"
+                )
+                self.user_perms = {
+                    "user": "Github App",
+                    "scopes": [],
+                    "name": "GATO-X App Mode",
+                }
+            else:
+                return False
 
         if not self.user_perms:
             self.user_perms = self.api.check_user()
@@ -95,7 +90,7 @@ class Enumerator:
                 "The authenticated user is: "
                 f"{Output.bright(self.user_perms['user'])}"
             )
-            if len(self.user_perms["scopes"]):
+            if self.user_perms["scopes"]:
                 Output.info(
                     "The GitHub Classic PAT has the following scopes: "
                     f'{Output.yellow(", ".join(self.user_perms["scopes"]))}'
@@ -153,10 +148,10 @@ class Enumerator:
 
         Returns:
             bool: False if the PAT is not valid for enumeration.
-            (list, list): Tuple containing list of orgs and list of repos.
         """
 
-        self.__setup_user_info()
+        if not self.__setup_user_info():
+            return False
 
         if not self.user_perms:
             return False
@@ -168,7 +163,7 @@ class Enumerator:
         Output.info("Enumerating user owned repositories!")
 
         repos = self.api.get_own_repos()
-        repo_wrappers = self.enumerate_repos(repos)
+        repo_wrappers = self.enumerate_repos(repos) if repos else []
         orgs = self.api.check_organizations()
 
         Output.info(
@@ -179,7 +174,7 @@ class Enumerator:
         for org in orgs:
             Output.tabbed(f"{Output.bright(org)}")
 
-        org_wrappers = list(map(self.enumerate_organization, orgs))
+        org_wrappers = [self.enumerate_organization(org) for org in orgs] if orgs else []
 
         return org_wrappers, repo_wrappers
 
@@ -252,10 +247,9 @@ class Enumerator:
 
         try:
             for repo in enum_list:
-                if repo.is_archived():
+                if repo.is_archived() or (self.skip_log and repo.is_fork()):
                     continue
-                if self.skip_log and repo.is_fork():
-                    continue
+
                 Output.tabbed(f"Enumerating: {Output.bright(repo.name)}!")
 
                 cached_repo = CacheManager().get_repository(repo.name)
@@ -331,13 +325,12 @@ class Enumerator:
         Args:
             repo_names (list): Repository name in {Org/Owner}/Repo format.
         """
-        repo_wrappers = []
         if not self.__setup_user_info():
-            return repo_wrappers
+            return False
 
-        if len(repo_names) == 0:
+        if not repo_names:
             Output.error("The list of repositories was empty!")
-            return repo_wrappers
+            return
 
         Output.info(
             f"Querying and caching workflow YAML files "
@@ -346,6 +339,7 @@ class Enumerator:
         queries = GqlQueries.get_workflow_ymls_from_list(repo_names)
         self.__query_graphql_workflows(queries)
 
+        repo_wrappers = []
         try:
             for repo in repo_names:
                 repo_obj = self.enumerate_repo_only(repo, len(repo_names) > 100)
