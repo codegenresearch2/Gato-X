@@ -110,7 +110,7 @@ class Job():
         if isinstance(runs_on, str):
             if runs_on.startswith('self-hosted'):
                 # Logic to track self-hosted runners
-                pass
+                self.runner = runs_on
             elif 'LARGER_RUNNERS' in ConfigurationManager().WORKFLOW_PARSING and runs_on in ConfigurationManager().WORKFLOW_PARSING['LARGER_RUNNERS']:
                 # Logic for larger runners
                 pass
@@ -125,7 +125,11 @@ class Job():
         matrix_keys = self.MATRIX_KEY_EXTRACTION_REGEX.findall(runs_on[0])
         if matrix_keys:
             # Logic to process matrix jobs
-            pass
+            for key in matrix_keys:
+                if key.startswith('self-hosted'):
+                    # Logic to track self-hosted runners in matrix jobs
+                    self.runner = runs_on
+                    break
 
     def getJobDependencies(self):
         """Returns Job objects for jobs that must complete
@@ -147,6 +151,7 @@ class Job():
         elif isinstance(self.runner, list):
             matrix_keys = self.MATRIX_KEY_EXTRACTION_REGEX.findall(self.runner[0])
             if matrix_keys:
-                # Logic to check if the matrix job might run on a self-hosted runner
-                pass
+                for key in matrix_keys:
+                    if key.startswith('self-hosted'):
+                        return True
         return False
