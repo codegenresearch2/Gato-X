@@ -9,14 +9,14 @@ from gatox.github.api import Api
 
 
 class OrganizationEnum():
-    """Helper class to wrap organization specific enumeration funcionality.
+    """Helper class to wrap organization specific enumeration functionality.
     """
 
     def __init__(self, api: Api):
         """Simple init method.
 
         Args:
-            api (Api): Insantiated GitHub API wrapper object.
+            api (Api): Instantiated GitHub API wrapper object.
         """
         self.api = api
 
@@ -52,8 +52,7 @@ class OrganizationEnum():
             organization.name, ['private', 'internal']
         )
 
-        # We might legitimately have no private repos despite being a
-        # member.
+        # We might legitimately have no private repos despite being a member.
         if org_private_repos:
             sso_enabled = self.api.validate_sso(
                 organization.name, org_private_repos[0].name
@@ -66,6 +65,9 @@ class OrganizationEnum():
             organization.name, ['public']
         )
 
+        organization.set_public_repos(org_public_repos)
+        organization.set_private_repos(org_private_repos)
+
         if organization.sso_enabled:
             return org_private_repos + org_public_repos
         else:
@@ -75,7 +77,7 @@ class OrganizationEnum():
         """Enumeration tasks to perform if the user is an org admin and the
         token has the necessary scopes.
         """
-        if organization.org_admin_scopes and organization.org_admin_user:
+        if 'admin:org' in organization.user_scopes:
 
             runners = self.api.check_org_runners(organization.name)
             if runners:
