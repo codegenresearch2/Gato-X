@@ -2,7 +2,7 @@ class GqlQueries():
     """Constructs graphql queries for use with the GitHub GraphQL api.
     """
 
-    REPO_WORKFLOWS_FRAGMENT = """
+    GET_YMLS_WITH_SLUGS = """
     fragment repoWorkflows on Repository {
         nameWithOwner
         stargazers {
@@ -87,8 +87,8 @@ class GqlQueries():
 
         queries = []
 
-        for i in range(0, len(repos), 50):
-            chunk = repos[i:i + 50]
+        for i in range(0, len(repos), 100):
+            chunk = repos[i:i + 100]
             repo_queries = []
 
             for j, repo in enumerate(chunk):
@@ -101,7 +101,7 @@ class GqlQueries():
                 repo_queries.append(repo_query)
 
             queries.append(
-                {"query": GqlQueries.REPO_WORKFLOWS_FRAGMENT + "{\n" + "\n".join(repo_queries) + "\n}"}
+                {"query": GqlQueries.GET_YMLS_WITH_SLUGS + "{\n" + "\n".join(repo_queries) + "\n}"}
             )
 
         return queries
@@ -126,7 +126,7 @@ class GqlQueries():
                 "query": GqlQueries.GET_YMLS_ENV if repos[i].can_push() else GqlQueries.GET_YMLS,
                 "variables": {
                     "node_ids": [
-                        repo.repo_data['node_id'] for repo in repos[0+100*i:top_len]
+                        repo.repo_data['node_id'] for repo in repos[i*100:top_len]
                     ]
                 }
             }
