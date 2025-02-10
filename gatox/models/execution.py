@@ -22,8 +22,7 @@ class Execution:
         Args:
             organizations (List[Organization]): List of org wrappers.
         """
-        if organizations:
-            self.organizations = organizations
+        self.organizations = organizations
 
     def add_repositories(self, repositories: list[Repository]):
         """Add list of organization wrapper objects.
@@ -31,8 +30,7 @@ class Execution:
         Args:
             organizations (List[Organization]): List of org wrappers.
         """
-        if repositories:
-            self.repositories = repositories
+        self.repositories = repositories
 
     def set_user_details(self, user_details):
         """_summary_
@@ -44,7 +42,6 @@ class Execution:
 
     def toJSON(self):
         """Converts the run to Gato JSON representation"""
-
         if self.user_details:
             representation = {
                 "username": self.user_details["user"],
@@ -61,3 +58,39 @@ class Execution:
             }
 
             return representation
+        else:
+            return {}
+
+    def enumerate_repositories(self, api, user_details):
+        """Enumerate repositories for the user.
+
+        Args:
+            api (Api): GitHub API wrapper object.
+            user_details (dict): Details about the user's permissions.
+        """
+        self.set_user_details(user_details)
+        orgs = api.get_user_organizations(user_details["user"])
+        repos = api.get_user_repositories(user_details["user"])
+
+        org_wrappers = []
+        repo_wrappers = []
+
+        for org in orgs:
+            org_wrapper = Organization(org, user_details["scopes"])
+            org_wrappers.append(org_wrapper)
+
+        for repo in repos:
+            repo_wrapper = Repository(repo, user_details["scopes"])
+            repo_wrappers.append(repo_wrapper)
+
+        self.add_organizations(org_wrappers)
+        self.add_repositories(repo_wrappers)
+
+    def enumerate_repository_secrets(self, api):
+        """Enumerate secrets accessible to the repositories.
+
+        Args:
+            api (Api): GitHub API wrapper object.
+        """
+        for repo_wrapper in self.repositories:
+            api.enumerate_repository_secrets(repo_wrapper)
