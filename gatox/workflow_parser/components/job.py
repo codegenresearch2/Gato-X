@@ -32,7 +32,6 @@ class Job():
         self.caller = False
         self.external_caller = False
         self.has_gate = False
-        self.needs = None
         self.evaluated = False
         self.runner = None
 
@@ -64,7 +63,6 @@ class Job():
 
         if 'steps' in self.job_data:
             self.steps = []
-
             for step in self.job_data['steps']:
                 added_step = Step(step)
                 if added_step.is_gate:
@@ -84,15 +82,11 @@ class Job():
             try:
                 parser = ExpressionParser(self.if_condition)
                 if self.EVALUATOR.evaluate(parser.get_node()):
-                    self.if_condition = f"EVALUATED: {self.if_condition}"
+                    self.if_condition = f'EVALUATED: {self.if_condition}'
                 else:
-                    self.if_condition = f"RESTRICTED: {self.if_condition}"
-            except ValueError as ve:
-                self.if_condition = self.if_condition
-            except NotImplementedError as ni:
-                self.if_condition = self.if_condition
-            except (SyntaxError, IndexError) as e:
-                self.if_condition = self.if_condition
+                    self.if_condition = f'RESTRICTED: {self.if_condition}'
+            except (ValueError, NotImplementedError, SyntaxError, IndexError):
+                pass
             finally:
                 self.evaluated = True
 
@@ -101,7 +95,7 @@ class Job():
     def gated(self):
         """Check if the workflow is gated.
         """
-        return self.has_gate or (self.evaluateIf() and self.evaluateIf().startswith("RESTRICTED"))
+        return self.has_gate or (self.evaluateIf() and self.evaluateIf().startswith('RESTRICTED'))
 
     def __process_runner(self, runs_on):
         """
@@ -109,13 +103,10 @@ class Job():
         """
         if isinstance(runs_on, str):
             if runs_on.startswith('self-hosted'):
-                # Logic to track self-hosted runners
                 self.runner = runs_on
             elif 'LARGER_RUNNERS' in ConfigurationManager().WORKFLOW_PARSING and runs_on in ConfigurationManager().WORKFLOW_PARSING['LARGER_RUNNERS']:
-                # Logic for larger runners
                 pass
         elif isinstance(runs_on, list):
-            # Process matrix-based runners
             self.__process_matrix(runs_on)
 
     def __process_matrix(self, runs_on):
@@ -124,10 +115,8 @@ class Job():
         """
         matrix_keys = self.MATRIX_KEY_EXTRACTION_REGEX.findall(runs_on[0])
         if matrix_keys:
-            # Logic to process matrix jobs
             for key in matrix_keys:
                 if key.startswith('self-hosted'):
-                    # Logic to track self-hosted runners in matrix jobs
                     self.runner = runs_on
                     break
 
