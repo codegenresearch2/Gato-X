@@ -22,7 +22,7 @@ class Job():
         """
         self.job_name = job_name
         self.job_data = job_data
-        self.needs = []
+        self.needs = None
         self.steps = []
         self.env = {}
         self.permissions = []
@@ -36,7 +36,7 @@ class Job():
         self.runner = None
 
         if 'environment' in self.job_data:
-            if type(self.job_data['environment']) == list:
+            if isinstance(self.job_data['environment'], list):
                 self.deployments.extend(self.job_data['environment'])
             else:
                 self.deployments.append(self.job_data['environment'])
