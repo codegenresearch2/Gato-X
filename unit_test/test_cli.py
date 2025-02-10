@@ -16,7 +16,7 @@ def test_cli_no_gh_token(capfd):
     out, err = capfd.readouterr()
     assert "Please enter a valid GitHub token." in err
 
-def test_cli_fine_grained_pat():
+def test_cli_fine_grained_pat(capfd):
     """Test that the CLI raises a SystemExit with an appropriate error message for fine-grained PATs."""
     os.environ["GH_TOKEN"] = "github_pat_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     with pytest.raises(SystemExit):
@@ -24,7 +24,7 @@ def test_cli_fine_grained_pat():
     out, err = capfd.readouterr()
     assert "not supported" in err
 
-def test_cli_s2s_token():
+def test_cli_s2s_token(capfd):
     """Test that the CLI raises a SystemExit with an appropriate error message for service-to-service tokens."""
     os.environ["GH_TOKEN"] = "ghs_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     with pytest.raises(SystemExit):
@@ -32,7 +32,7 @@ def test_cli_s2s_token():
     out, err = capfd.readouterr()
     assert "not support App tokens without machine flag" in err
 
-def test_cli_s2s_token_no_machine():
+def test_cli_s2s_token_no_machine(capfd):
     """Test that the CLI raises a SystemExit with an appropriate error message for service-to-service tokens without the machine flag."""
     os.environ["GH_TOKEN"] = "ghs_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     with pytest.raises(SystemExit):
@@ -40,7 +40,7 @@ def test_cli_s2s_token_no_machine():
     out, err = capfd.readouterr()
     assert "not support App tokens without machine flag" in err
 
-def test_cli_u2s_token():
+def test_cli_u2s_token(capfd):
     """Test that the CLI raises a SystemExit with an appropriate error message for user-to-server tokens."""
     os.environ["GH_TOKEN"] = "ghu_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     with pytest.raises(SystemExit):
@@ -80,7 +80,7 @@ def test_cli_old_token(mock_enumerate, capfd):
     out, err = capfd.readouterr()
     assert "Authenticated user is: testUser" in out
 
-def test_cli_invalid_pat():
+def test_cli_invalid_pat(capfd):
     """Test that the CLI raises a SystemExit with an appropriate error message for an invalid PAT."""
     os.environ["GH_TOKEN"] = "invalid"
     with pytest.raises(SystemExit):
@@ -88,7 +88,7 @@ def test_cli_invalid_pat():
     out, err = capfd.readouterr()
     assert "malformed" in err
 
-def test_cli_double_proxy():
+def test_cli_double_proxy(capfd):
     """Test that the CLI raises a SystemExit when both socks and http proxies are provided."""
     with pytest.raises(SystemExit):
         cli.cli(["-sp", "socks", "-p", "http", "enumerate", "-t", "test"])
