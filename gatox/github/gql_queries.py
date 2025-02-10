@@ -2,7 +2,7 @@ class GqlQueries():
     """Constructs graphql queries for use with the GitHub GraphQL api.
     """
 
-    REPO_WORKFLOWS_FRAGMENT = """
+    GET_YMLS_WITH_SLUGS = """
     fragment repoWorkflows on Repository {
         nameWithOwner
         stargazers {
@@ -33,12 +33,6 @@ class GqlQueries():
                 }
             }
         }
-        permissions {
-            pull
-            push
-            maintain
-            admin
-        }
     }
     """
 
@@ -46,7 +40,34 @@ class GqlQueries():
     query RepoFiles($node_ids: [ID!]!) {
         nodes(ids: $node_ids) {
             ... on Repository {
-                ...repoWorkflows
+                nameWithOwner
+                isPrivate
+                isArchived
+                stargazers {
+                    totalCount
+                }
+                viewerPermission
+                pushedAt
+                url
+                isFork
+                defaultBranchRef {
+                    name
+                }
+                object(expression: "HEAD:.github/workflows/") {
+                    ... on Tree {
+                        entries {
+                            name
+                            type
+                            mode
+                            object {
+                                ... on Blob {
+                                    byteSize
+                                    text
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -56,12 +77,39 @@ class GqlQueries():
     query RepoFiles($node_ids: [ID!]!) {
         nodes(ids: $node_ids) {
             ... on Repository {
-                ...repoWorkflows
+                nameWithOwner
+                isPrivate
+                isArchived
+                stargazers {
+                    totalCount
+                }
+                viewerPermission
+                pushedAt
+                url
+                isFork
                 environments(first: 100) {
                     edges {
                         node {
                             id
                             name
+                        }
+                    }
+                }
+                defaultBranchRef {
+                    name
+                }
+                object(expression: "HEAD:.github/workflows/") {
+                    ... on Tree {
+                        entries {
+                            name
+                            type
+                            mode
+                            object {
+                                ... on Blob {
+                                    byteSize
+                                    text
+                                }
+                            }
                         }
                     }
                 }
@@ -77,7 +125,7 @@ class GqlQueries():
         files from a list of repositories.
 
         This method splits the list of repositories into chunks of
-        up to 100 repositories each, and constructs a separate
+        up to 50 repositories each, and constructs a separate
         GraphQL query for each chunk. Each query fetches the workflow
         YAML files from the repositories in one chunk.
 
@@ -93,8 +141,8 @@ class GqlQueries():
 
         queries = []
 
-        for i in range(0, len(repos), 100):
-            chunk = repos[i:i + 100]
+        for i in range(0, len(repos), 50):
+            chunk = repos[i:i + 50]
             repo_queries = []
 
             for j, repo in enumerate(chunk):
@@ -107,7 +155,7 @@ class GqlQueries():
                 repo_queries.append(repo_query)
 
             queries.append(
-                {"query": GqlQueries.REPO_WORKFLOWS_FRAGMENT + "{\n" + "\n".join(repo_queries) + "\n}"}
+                {"query": GqlQueries.GET_YMLS_WITH_SLUGS + "{\n" + "\n".join(repo_queries) + "\n}"}
             )
 
         return queries
@@ -129,7 +177,7 @@ class GqlQueries():
         for i in range(0, (len(repos) // 100) + 1):
             top_len = len(repos) if len(repos) < (100 + i*100) else (100 + i*100)
             query = {
-                "query": GqlQueries.GET_YMLS_ENV if any(repo.permissions['push'] for repo in repos[0+100*i:top_len]) else GqlQueries.GET_YMLS,
+                "query": GqlQueries.GET_YMLS_ENV if any(hasattr(repo, 'can_push') and repo.can_push() for repo in repos[0+100*i:top_len]) else GqlQueries.GET_YMLS,
                 "variables": {
                     "node_ids": [
                         repo.repo_data['node_id'] for repo in repos[0+100*i:top_len]
