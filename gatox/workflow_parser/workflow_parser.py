@@ -1,4 +1,3 @@
-"""
 Copyright 2024, Adnan Khan
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,10 +14,9 @@ limitations under the License.
 """
 
 import logging
-
-from pathlib import Path
 import os
 import re
+from pathlib import Path
 
 from gatox.configuration.configuration_manager import ConfigurationManager
 from gatox.workflow_parser.utility import filter_tokens, decompose_action_ref
@@ -31,7 +29,7 @@ logger = logging.getLogger(__name__)
 class WorkflowParser():
     """Parser for YML files.
 
-    This class is structurd to take a yaml file as input, it will then
+    This class is structured to take a yaml file as input, it will then
     expose methods that aim to answer questions about the yaml file.
 
     This will allow for growing what kind of analytics this tool can perform
@@ -48,10 +46,7 @@ class WorkflowParser():
         """Initialize class with workflow file.
 
         Args:
-            workflow_yml (str): String containing yaml file read in from
-            repository.
-            repo_name (str): Name of the repository.
-            workflow_name (str): name of the workflow file
+            workflow_wrapper (Workflow): Workflow object containing parsed yaml data.
         """
         if workflow_wrapper.isInvalid():
             raise ValueError("Received invalid workflow!")
@@ -91,7 +86,7 @@ class WorkflowParser():
         Returns:
             bool: Whether the workflow has the specified trigger.
         """
-        return self.get_vulnerable_triggers(trigger)
+        return trigger in self.get_vulnerable_triggers()
 
     def output(self, dirpath: str):
         """Write this yaml file out to the provided directory.
@@ -133,7 +128,7 @@ class WorkflowParser():
             
         return referenced_actions
 
-    def get_vulnerable_triggers(self, alternate=False):
+    def get_vulnerable_triggers(self):
         """Analyze if the workflow is set to execute on potentially risky triggers.
 
         Returns:
@@ -142,10 +137,7 @@ class WorkflowParser():
         """
         vulnerable_triggers = []
         risky_triggers = ['pull_request_target', 'workflow_run', 
-                          'issue_comment', 'issues', 'discussion_comment', 'discussion'
-                          'fork', 'watch']
-        if alternate:
-            risky_triggers = [alternate]
+                          'issue_comment', 'issues']
 
         if not self.parsed_yml or 'on' not in self.parsed_yml:
             return vulnerable_triggers
@@ -205,11 +197,6 @@ class WorkflowParser():
             }
             step_details = []
             bump_confidence = False
-
-            if job.isCaller():
-                self.callees.append(job.uses.split('/')[-1])
-            elif job.external_caller:
-                self.callees.append(job.uses)
 
             if job_content['if_check'] and job_content['if_check'].startswith("RESTRICTED"):
                 job_content['gated'] = True
