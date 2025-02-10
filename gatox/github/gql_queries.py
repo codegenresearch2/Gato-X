@@ -1,10 +1,8 @@
-# Updated code snippet addressing the feedback
-
 class GqlQueries():
     """Constructs graphql queries for use with the GitHub GraphQL api.
     """
 
-    GET_YMLS_WITH_SLUGS = """
+    REPO_WORKFLOWS_FRAGMENT = """
     fragment repoWorkflows on Repository {
         nameWithOwner
         stargazers {
@@ -103,7 +101,7 @@ class GqlQueries():
                 repo_queries.append(repo_query)
 
             queries.append(
-                {"query": GqlQueries.GET_YMLS_WITH_SLUGS + "{\n" + "\n".join(repo_queries) + "\n}"}
+                {"query": GqlQueries.REPO_WORKFLOWS_FRAGMENT + "{\n" + "\n".join(repo_queries) + "\n}"}
             )
 
         return queries
