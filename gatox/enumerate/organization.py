@@ -26,7 +26,12 @@ class OrganizationEnum():
             organization (str): Name of the organization.
             visibilities (list): List of visibilities (public, private, etc)
         """
-        return [Repository(repo) for visibility in visibilities for repo in self.api.check_org_repos(organization, visibility)]
+        repos = []
+        for visibility in visibilities:
+            raw_repos = self.api.check_org_repos(organization, visibility)
+            if raw_repos:
+                repos.extend([Repository(repo) for repo in raw_repos])
+        return repos
 
     def construct_repo_enum_list(self, organization: Organization) -> List[Repository]:
         """Constructs a list of repositories that a user has access to within an organization.
@@ -43,9 +48,17 @@ class OrganizationEnum():
         organization.set_public_repos(org_public_repos)
         organization.set_private_repos(org_private_repos)
 
-        organization.sso_enabled = self.api.validate_sso(organization.name, org_private_repos[0].name) if org_private_repos else False
+        # Check for SSO only if there are private repositories
+        if org_private_repos:
+            organization.sso_enabled = self.api.validate_sso(organization.name, org_private_repos[0].name)
+        else:
+            organization.sso_enabled = False
 
-        return org_private_repos + org_public_repos if organization.sso_enabled else org_public_repos
+        # Return private repositories if SSO is enabled, otherwise return public repositories
+        if organization.sso_enabled:
+            return org_private_repos + org_public_repos
+        else:
+            return org_public_repos
 
     def admin_enum(self, organization: Organization):
         """Enumeration tasks to perform if the user is an org admin and the token has the necessary scopes.
@@ -53,7 +66,16 @@ class OrganizationEnum():
         if organization.org_admin_scopes and organization.org_admin_user:
             runners = self.api.check_org_runners(organization.name)
             if runners:
-                org_runners = [Runner(runner['name'], machine_name=None, os=runner['os'], status=runner['status'], labels=runner['labels']) for runner in runners['runners']]
+                org_runners = [
+                    Runner(
+                        runner['name'],
+                        machine_name=None,
+                        os=runner['os'],
+                        status=runner['status'],
+                        labels=runner['labels']
+                    )
+                    for runner in runners['runners']
+                ]
                 organization.set_runners(org_runners)
 
             org_secrets = self.api.get_org_secrets(organization.name)
