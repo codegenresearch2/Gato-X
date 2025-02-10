@@ -12,7 +12,7 @@ class Repository():
         """Initialize wrapper class.
 
         Args:
-            repo_json (dict): Dictionary from parsing JSON object returned from
+            repo_data (dict): Dictionary from parsing JSON object returned from
             GitHub
         """
         self.repo_data = repo_data
@@ -34,41 +34,96 @@ class Repository():
         self.pwn_req_risk = []
         self.injection_risk = []
 
-    def is_admin(self):
+    def is_admin(self) -> bool:
+        """Check if the user has admin permissions for the repository.
+
+        Returns:
+            bool: True if the user has admin permissions, False otherwise.
+        """
         return self.permission_data.get('admin', False)
 
-    def is_maintainer(self):
+    def is_maintainer(self) -> bool:
+        """Check if the user has maintainer permissions for the repository.
+
+        Returns:
+            bool: True if the user has maintainer permissions, False otherwise.
+        """
         return self.permission_data.get('maintain', False)
 
-    def can_push(self):
+    def can_push(self) -> bool:
+        """Check if the user has push permissions for the repository.
+
+        Returns:
+            bool: True if the user has push permissions, False otherwise.
+        """
         return self.permission_data.get('push', False)
 
-    def can_pull(self):
+    def can_pull(self) -> bool:
+        """Check if the user has pull permissions for the repository.
+
+        Returns:
+            bool: True if the user has pull permissions, False otherwise.
+        """
         return self.permission_data.get('pull', False)
 
-    def is_private(self):
-        return self.repo_data['private']
+    def is_private(self) -> bool:
+        """Check if the repository is private.
+
+        Returns:
+            bool: True if the repository is private, False otherwise.
+        """
+        return self.repo_data['visibility'] == 'private'
     
-    def is_archived(self):
+    def is_archived(self) -> bool:
+        """Check if the repository is archived.
+
+        Returns:
+            bool: True if the repository is archived, False otherwise.
+        """
         return self.repo_data['archived']
 
-    def is_internal(self):
+    def is_internal(self) -> bool:
+        """Check if the repository is internal.
+
+        Returns:
+            bool: True if the repository is internal, False otherwise.
+        """
         return self.repo_data['visibility'] == 'internal'
 
-    def is_public(self):
+    def is_public(self) -> bool:
+        """Check if the repository is public.
+
+        Returns:
+            bool: True if the repository is public, False otherwise.
+        """
         return self.repo_data['visibility'] == 'public'
     
-    def is_fork(self):
+    def is_fork(self) -> bool:
+        """Check if the repository is a fork.
+
+        Returns:
+            bool: True if the repository is a fork, False otherwise.
+        """
         return self.repo_data['fork']
 
-    def can_fork(self):
+    def can_fork(self) -> bool:
+        """Check if the repository allows forking.
+
+        Returns:
+            bool: True if the repository allows forking, False otherwise.
+        """
         return self.repo_data.get('allow_forking', False)
 
-    def default_path(self):
+    def default_path(self) -> str:
+        """Get the default path for the repository.
+
+        Returns:
+            str: The default path for the repository.
+        """
         return f"{self.repo_data['html_url']}/blob/{self.repo_data['default_branch']}"
 
     def update_time(self):
-        """Update timestamp.
+        """Update the timestamp for the last enumeration.
         """
         self.enum_time = datetime.datetime.now()
 
@@ -90,17 +145,27 @@ class Repository():
         self.pwn_req_risk = [element for element in self.pwn_req_risk if \
                              element['workflow_name'] != workflow_name]
 
-    def has_pwn_request(self):
+    def has_pwn_request(self) -> bool:
         """Return True if there are any pwn request risks.
+
+        Returns:
+            bool: True if there are any pwn request risks, False otherwise.
         """
         return len(self.pwn_req_risk) > 0
 
     def set_injection(self, injection_package: dict):
-        """Set injection risk package."""
+        """Set injection risk package.
+
+        Args:
+            injection_package (dict): The injection risk package.
+        """
         self.injection_risk.append(injection_package)
 
-    def has_injection(self):
+    def has_injection(self) -> bool:
         """Return True if there are any injection risks.
+
+        Returns:
+            bool: True if there are any injection risks, False otherwise.
         """
         return len(self.injection_risk) > 0
 
@@ -114,12 +179,18 @@ class Repository():
 
     def set_runners(self, runners: list[Runner]):
         """Sets list of self-hosted runners attached at the repository level.
+
+        Args:
+            runners (List[Runner]): List of Runner wrapper objects.
         """
         self.sh_runner_access = True
         self.runners = runners
 
     def add_self_hosted_workflows(self, workflows: list):
         """Add a list of workflow file names that run on self-hosted runners.
+
+        Args:
+            workflows (List[str]): List of workflow file names.
         """
         self.sh_workflow_names.extend(workflows)
 
@@ -133,8 +204,11 @@ class Repository():
         self.sh_runner_access = True
         self.accessible_runners.append(runner)
 
-    def toJSON(self):
+    def toJSON(self) -> dict:
         """Converts the repository to a Gato JSON representation.
+
+        Returns:
+            dict: The JSON representation of the repository.
         """
         representation = {
             "name": self.name,
