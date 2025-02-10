@@ -336,3 +336,25 @@ class Enumerator:
             Output.warn("Keyboard interrupt detected, exiting enumeration!")
 
         return repo_wrappers
+
+# Adding the missing method to the Repository class
+class Repository:
+    def set_permissions(self, permissions):
+        """Set the permissions for the repository.
+
+        Args:
+            permissions (dict): Dictionary containing the permissions.
+        """
+        # Implement the logic to set the permissions here
+        pass
+
+# Adding the missing method to the RepositoryEnum class
+class RepositoryEnum:
+    def check_trigger_vulnerabilities(self, repository):
+        """Check for vulnerabilities related to repository triggers.
+
+        Args:
+            repository (Repository): Repository object.
+        """
+        # Implement the logic to check for trigger vulnerabilities here
+        pass
