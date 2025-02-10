@@ -95,15 +95,16 @@ class Organization():
         Returns:
             dict: JSON representation of the organization.
         """
-        representation = {
-            "name": self.name,
-            "org_admin_user": self.org_admin_user,
-            "org_member": self.org_member,
-            "org_runners": [runner.toJSON() for runner in self.runners],
-            "org_secrets": [secret.toJSON() for secret in self.secrets],
-            "sso_access": self.sso_enabled,
-            "public_repos": [repository.toJSON() for repository in self.public_repos],
-            "private_repos": [repository.toJSON() for repository in self.private_repos]
-        }
-
-        return representation
+        if self.limited_data:
+            return {"name": self.name}
+        else:
+            return {
+                "name": self.name,
+                "org_admin_user": self.org_admin_user,
+                "org_member": self.org_member,
+                "org_runners": [runner.toJSON() for runner in self.runners],
+                "org_secrets": [secret.toJSON() for secret in self.secrets],
+                "sso_access": self.sso_enabled,
+                "public_repos": [repository.toJSON() for repository in self.public_repos],
+                "private_repos": [repository.toJSON() for repository in self.private_repos]
+            }
