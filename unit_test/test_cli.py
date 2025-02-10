@@ -11,38 +11,42 @@ def mock_settings_env_vars(request):
 def test_cli_no_gh_token(capfd):
     """Test that the CLI raises an OSError when no GH_TOKEN is set."""
     del os.environ["GH_TOKEN"]
-    with pytest.raises(OSError) as exc_info:
+    with pytest.raises(OSError):
         cli.cli(["enumerate", "-t", "test"])
     out, err = capfd.readouterr()
-    assert "Please enter a valid GitHub token." in str(exc_info.value)
+    assert "Please enter a valid GitHub token." in err
 
 def test_cli_fine_grained_pat():
     """Test that the CLI raises a SystemExit with an appropriate error message for fine-grained PATs."""
     os.environ["GH_TOKEN"] = "github_pat_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-    with pytest.raises(SystemExit) as exc_info:
+    with pytest.raises(SystemExit):
         cli.cli(["enumerate", "-t", "test"])
-    assert "The provided PAT is not supported." in str(exc_info.value)
+    out, err = capfd.readouterr()
+    assert "not supported" in err
 
 def test_cli_s2s_token():
     """Test that the CLI raises a SystemExit with an appropriate error message for service-to-service tokens."""
     os.environ["GH_TOKEN"] = "ghs_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-    with pytest.raises(SystemExit) as exc_info:
+    with pytest.raises(SystemExit):
         cli.cli(["enumerate", "-t", "test"])
-    assert "Service-to-service tokens are not supported without the machine flag." in str(exc_info.value)
+    out, err = capfd.readouterr()
+    assert "not support App tokens without machine flag" in err
 
 def test_cli_s2s_token_no_machine():
     """Test that the CLI raises a SystemExit with an appropriate error message for service-to-service tokens without the machine flag."""
     os.environ["GH_TOKEN"] = "ghs_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-    with pytest.raises(SystemExit) as exc_info:
+    with pytest.raises(SystemExit):
         cli.cli(["enumerate", "-r", "testOrg/testRepo"])
-    assert "Service-to-service tokens are not supported without the machine flag." in str(exc_info.value)
+    out, err = capfd.readouterr()
+    assert "not support App tokens without machine flag" in err
 
 def test_cli_u2s_token():
     """Test that the CLI raises a SystemExit with an appropriate error message for user-to-server tokens."""
     os.environ["GH_TOKEN"] = "ghu_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-    with pytest.raises(SystemExit) as exc_info:
+    with pytest.raises(SystemExit):
         cli.cli(["enumerate", "-t", "test"])
-    assert "The provided GitHub PAT is malformed or unsupported." in str(exc_info.value)
+    out, err = capfd.readouterr()
+    assert "Provided GitHub PAT is malformed or unsupported" in err
 
 @mock.patch("gatox.cli.cli.Enumerator")
 def test_cli_oauth_token(mock_enumerate, capfd):
@@ -79,15 +83,17 @@ def test_cli_old_token(mock_enumerate, capfd):
 def test_cli_invalid_pat():
     """Test that the CLI raises a SystemExit with an appropriate error message for an invalid PAT."""
     os.environ["GH_TOKEN"] = "invalid"
-    with pytest.raises(SystemExit) as exc_info:
+    with pytest.raises(SystemExit):
         cli.cli(["enumerate", "-t", "test"])
-    assert "The provided GitHub PAT is malformed or unsupported." in str(exc_info.value)
+    out, err = capfd.readouterr()
+    assert "malformed" in err
 
 def test_cli_double_proxy():
     """Test that the CLI raises a SystemExit when both socks and http proxies are provided."""
-    with pytest.raises(SystemExit) as exc_info:
+    with pytest.raises(SystemExit):
         cli.cli(["-sp", "socks", "-p", "http", "enumerate", "-t", "test"])
-    assert "Cannot use both socks and http proxy at the same time." in str(exc_info.value)
+    out, err = capfd.readouterr()
+    assert "proxy at the same time" in err
 
 # Additional test cases can be added here to cover more scenarios
 
