@@ -103,7 +103,7 @@ class Enumerator:
         for org in orgs:
             Output.tabbed(f"{Output.bright(org)}")
 
-        return [Organization({'login': org, 'allow_forking': True}, self.user_perms['scopes'], True) for org in orgs]
+        return [{'login': org, 'allow_forking': True} for org in orgs]
 
     def self_enumeration(self):
         """Enumerates all organizations associated with the authenticated user.
