@@ -15,49 +15,46 @@ class DataIngestor:
         """
         cache = CacheManager()
         for result in yml_results:
-            try:
-                # Check if result is valid and contains 'nameWithOwner'
-                if not result or 'nameWithOwner' not in result:
-                    continue
+            # Check if result is valid and contains 'nameWithOwner'
+            if not result or 'nameWithOwner' not in result:
+                continue
 
-                owner = result['nameWithOwner']
-                cache.set_empty(owner)
+            owner = result['nameWithOwner']
+            cache.set_empty(owner)
 
-                # Process yml files if they exist
-                if result['object']:
-                    for yml_node in result['object']['entries']:
-                        yml_name = yml_node['name']
-                        if yml_name.lower().endswith(('.yml', '.yaml')):
-                            contents = yml_node['object']['text']
-                            wf_wrapper = Workflow(owner, contents, yml_name)
-                            cache.set_workflow(owner, yml_name, wf_wrapper)
+            # Process yml files if they exist
+            if result['object']:
+                for yml_node in result['object']['entries']:
+                    yml_name = yml_node['name']
+                    if yml_name.lower().endswith(('.yml', '.yaml')):
+                        contents = yml_node['object']['text']
+                        wf_wrapper = Workflow(owner, contents, yml_name)
+                        cache.set_workflow(owner, yml_name, wf_wrapper)
 
-                # Construct repository data
-                repo_data = {
-                    'full_name': result['nameWithOwner'],
-                    'html_url': result['url'],
-                    'visibility': 'private' if result['isPrivate'] else 'public',
-                    'default_branch': result['defaultBranchRef']['name'] if result['defaultBranchRef'] else 'main',
-                    'allow_forking': result['isFork'],
-                    'stargazers_count': result['stargazers']['totalCount'],
-                    'pushed_at': result['pushedAt'],
-                    'permissions': {
-                        'pull': result['viewerPermission'] in ['READ', 'TRIAGE', 'WRITE', 'MAINTAIN', 'ADMIN'],
-                        'push': result['viewerPermission'] in ['WRITE', 'MAINTAIN', 'ADMIN'],
-                        'maintain': result['viewerPermission'] in ['MAINTAIN', 'ADMIN'],
-                        'admin': result['viewerPermission'] == 'ADMIN'
-                    },
-                    'archived': result['isArchived'],
-                    'is_fork': result['isFork'],
-                    'environments': []
-                }
+            # Construct repository data
+            repo_data = {
+                'full_name': result['nameWithOwner'],
+                'html_url': result['url'],
+                'visibility': 'private' if result['isPrivate'] else 'public',
+                'default_branch': result['defaultBranchRef']['name'] if result['defaultBranchRef'] else 'main',
+                'fork': result['isFork'],
+                'stargazers_count': result['stargazers']['totalCount'],
+                'pushed_at': result['pushedAt'],
+                'permissions': {
+                    'pull': result['viewerPermission'] in ['READ', 'TRIAGE', 'WRITE', 'MAINTAIN', 'ADMIN'],
+                    'push': result['viewerPermission'] in ['WRITE', 'MAINTAIN', 'ADMIN'],
+                    'maintain': result['viewerPermission'] in ['MAINTAIN', 'ADMIN'],
+                    'admin': result['viewerPermission'] == 'ADMIN'
+                },
+                'archived': result['isArchived'],
+                'is_fork': result['isFork'],
+                'environments': []
+            }
 
-                # Handle environments, excluding 'github-pages'
-                if 'environments' in result and result['environments']:
-                    envs = [env['node']['name'] for env in result['environments']['edges'] if env['node']['name'] != 'github-pages']
-                    repo_data['environments'] = envs
+            # Handle environments, excluding 'github-pages'
+            if 'environments' in result and result['environments']:
+                envs = [env['node']['name'] for env in result['environments']['edges'] if env['node']['name'] != 'github-pages']
+                repo_data['environments'] = envs
 
-                repo_wrapper = Repository(repo_data)
-                cache.set_repository(repo_wrapper)
-            except Exception as e:
-                print(f"An error occurred while processing repository {result['nameWithOwner']}: {str(e)}")
+            repo_wrapper = Repository(repo_data)
+            cache.set_repository(repo_wrapper)
